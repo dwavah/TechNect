@@ -9,6 +9,14 @@ async function safeJson(res) {
   }
 }
 
+//-------------GET USERS ------------------//
+export async function getUsers(token) {
+  const res = await fetch(`${BASE_URL}/admin/users`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.json();
+}
+
 // ------------------ AUTH ------------------
 
 // Register user (student or employer)
