@@ -19,13 +19,8 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
 
-    if (!email) {
-      toast.error("Please enter your email.");
-      setLoading(false);
-      return;
-    }
-    if (!password) {
-      toast.error("Please enter your password.");
+    if (!email || !password) {
+      toast.error("Please enter all fields.");
       setLoading(false);
       return;
     }
@@ -33,21 +28,30 @@ export default function Login() {
     try {
       const data = await loginUser({ email, password, role });
       if (data.token && data.user) {
-        login({ user: data.user, token: data.token }); // <<< CORRECTED
+        login({ user: data.user, token: data.token });
         toast.success("Login successful!");
-        navigate(role === "student" ? "/student/dashboard" : "/employer/dashboard");
+
+        // Navigate based on actual user role from backend
+        const userRole = data.user.role;
+        if (userRole === "admin") {
+          navigate("/admin/dashboard");
+        } else if (userRole === "employer") {
+          navigate("/employer/dashboard");
+        } else {
+          navigate("/student/dashboard");
+        }
       } else {
         toast.error(data.message || "Login failed.");
       }
     } catch (err) {
       toast.error("Unable to login. Please check your credentials.");
     }
+
     setLoading(false);
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] bg-gradient-to-br from-blue-100 via-sky-100 to-indigo-100 px-4">
-      {/* Animated Icon/Logo */}
       <div className="mb-6 flex flex-col items-center">
         <span className="inline-block bg-white shadow rounded-full p-4 mb-2 animate-bounce">
           <Lock className="w-8 h-8 text-blue-700" />
@@ -55,11 +59,11 @@ export default function Login() {
         <h2 className="text-2xl font-extrabold text-blue-900 mb-1">Welcome Back!</h2>
         <p className="text-slate-700 text-sm">Sign in to continue</p>
       </div>
+
       <form
         onSubmit={handleLogin}
         className="bg-white shadow-xl rounded-xl p-8 max-w-sm w-full space-y-5"
       >
-        {/* Email */}
         <div>
           <label className="block mb-1 text-blue-700">Email</label>
           <input
@@ -71,7 +75,7 @@ export default function Login() {
             placeholder="you@example.com"
           />
         </div>
-        {/* Password with show/hide */}
+
         <div>
           <label className="block mb-1 text-blue-700">Password</label>
           <div className="relative">
@@ -94,7 +98,7 @@ export default function Login() {
             </button>
           </div>
         </div>
-        {/* Role */}
+
         <div>
           <label className="block mb-1 text-blue-700">Role</label>
           <select
@@ -104,9 +108,10 @@ export default function Login() {
           >
             <option value="student">Student</option>
             <option value="employer">Employer</option>
+            <option value="admin">Admin</option>
           </select>
         </div>
-        {/* Login Button */}
+
         <button
           type="submit"
           className={`w-full py-2 px-4 rounded-2xl font-bold text-white transition ${
@@ -116,18 +121,17 @@ export default function Login() {
         >
           {loading ? "Logging in..." : "Login"}
         </button>
-        {/* Forgot Password */}
+
         <div className="text-center text-xs mt-2">
           <button
             type="button"
             className="text-blue-600 underline hover:text-blue-800 bg-transparent border-none p-0 cursor-pointer"
-            onClick={() => {
-              toast("Password reset coming soon!");
-            }}
+            onClick={() => toast("Password reset coming soon!")}
           >
             Forgot your password?
           </button>
         </div>
+
         <div className="text-center text-sm mt-2">
           Don&apos;t have an account?{" "}
           <span

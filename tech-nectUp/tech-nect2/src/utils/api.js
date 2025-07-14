@@ -264,6 +264,20 @@ export async function postGig(gigData, token) {
     return { success: false, message: err.message || "Failed to post gig." };
   }
 }
+// Delete a gig (employer)
+export async function deleteGig(gigId, token) {
+  try {
+    const res = await fetch(`${BASE_URL}/employer/gigs/${gigId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await safeJson(res);
+    if (!res.ok) throw new Error(data.message || "Failed to delete gig.");
+    return data;
+  } catch (err) {
+    return { success: false, message: err.message || "Failed to delete gig." };
+  }
+}
 
 // Edit a gig (employer)
 export async function editGig(gigId, gigData, token) {
@@ -286,7 +300,6 @@ export async function editGig(gigId, gigData, token) {
 
 // ------------------ UPSKILL ------------------
 
-// Get upskill recommendations for student
 export async function getUpskill(token) {
   try {
     const res = await fetch(`${BASE_URL}/upskill`, {
@@ -302,7 +315,6 @@ export async function getUpskill(token) {
 
 // ------------------ APPLICATIONS ------------------
 
-// Student: get my applications
 export async function getStudentApplications(token) {
   try {
     const res = await fetch(`${BASE_URL}/applications`, {
@@ -316,7 +328,6 @@ export async function getStudentApplications(token) {
   }
 }
 
-// Employer: get applicants for my jobs
 export async function getEmployerApplicants(token) {
   try {
     const res = await fetch(`${BASE_URL}/employer/applicants`, {
@@ -332,7 +343,6 @@ export async function getEmployerApplicants(token) {
 
 // ------------------ ADMIN ------------------
 
-// Admin dashboard stats (users, jobs, gigs, applications, etc)
 export async function getAdminStats(token) {
   try {
     const res = await fetch(`${BASE_URL}/admin/stats`, {
@@ -343,5 +353,20 @@ export async function getAdminStats(token) {
     return data;
   } catch (err) {
     return { success: false, message: err.message || "Could not fetch stats." };
+  }
+}
+
+// Delete user (admin only)
+export async function deleteUser(userId, token) {
+  try {
+    const res = await fetch(`${BASE_URL}/admin/users/${userId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await safeJson(res);
+    if (!res.ok) throw new Error(data.message || "Failed to delete user.");
+    return data;
+  } catch (err) {
+    return { success: false, message: err.message || "Failed to delete user." };
   }
 }
