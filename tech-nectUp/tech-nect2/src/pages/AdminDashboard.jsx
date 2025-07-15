@@ -10,6 +10,7 @@ import {
 } from "../utils/api";
 import toast from "react-hot-toast";
 import { saveAs } from "file-saver";
+import AdminHeader from "../components/AdminHeader";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -98,7 +99,7 @@ export default function AdminDashboard() {
 
   return (
     <section className="max-w-6xl mx-auto py-10 px-4">
-      <h2 className="text-3xl font-bold mb-6 text-purple-900">Admin Dashboard</h2>
+      <AdminHeader title="Admin Dashboard" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <div className="bg-blue-100 text-blue-800 p-6 rounded-xl shadow">
@@ -210,7 +211,9 @@ export default function AdminDashboard() {
                   <input
                     type="checkbox"
                     checked={selectedJobs.includes(job.id)}
-                    onChange={() => toggleSelect(job.id, selectedJobs, setSelectedJobs)}
+                    onChange={() =>
+                      toggleSelect(job.id, selectedJobs, setSelectedJobs)
+                    }
                   />
                 </td>
                 <td>{job.title}</td>
@@ -267,7 +270,9 @@ export default function AdminDashboard() {
                   <input
                     type="checkbox"
                     checked={selectedGigs.includes(gig.id)}
-                    onChange={() => toggleSelect(gig.id, selectedGigs, setSelectedGigs)}
+                    onChange={() =>
+                      toggleSelect(gig.id, selectedGigs, setSelectedGigs)
+                    }
                   />
                 </td>
                 <td>{gig.title}</td>

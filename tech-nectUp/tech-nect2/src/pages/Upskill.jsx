@@ -1,6 +1,8 @@
+// src/pages/Upskill.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getUpskill } from "../utils/api";
+import Navbar from "../components/Navbar";
 
 export default function Upskill() {
   const { user } = useAuth();
@@ -18,18 +20,22 @@ export default function Upskill() {
   }, [user.token]);
 
   return (
-    <section className="max-w-2xl mx-auto py-10 px-4">
-      <h2 className="text-3xl font-bold mb-4 text-blue-900">Upskill Recommendations</h2>
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <ul className="list-disc pl-5 space-y-2 text-lg text-blue-800">
-          {suggestions.length === 0
-            ? <li>No suggestions at this time.</li>
-            : suggestions.map((s, idx) => <li key={idx}>{s}</li>)
-          }
-        </ul>
-      )}
-    </section>
+    <>
+      <Navbar />
+
+      <section className="max-w-2xl mx-auto py-10 px-4">
+        <h2 className="text-3xl font-bold mb-4 text-blue-900">Upskill Recommendations</h2>
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <ul className="list-disc pl-5 space-y-2 text-lg text-blue-800">
+            {suggestions.length === 0
+              ? <li>No suggestions at this time.</li>
+              : suggestions.map((s, idx) => <li key={idx}>{s}</li>)
+            }
+          </ul>
+        )}
+      </section>
+    </>
   );
 }

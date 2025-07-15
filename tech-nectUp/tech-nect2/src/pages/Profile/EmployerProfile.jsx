@@ -3,16 +3,16 @@ import { useAuth } from "../../context/AuthContext";
 import { UserGroupIcon, PencilAltIcon, CheckIcon } from "@heroicons/react/outline";
 import toast from "react-hot-toast";
 import axios from "axios";
+import Navbar from "../../components/Navbar";
 
 export default function EmployerProfile() {
-  const { user, login } = useAuth(); // use login to update context after editing
+  const { user, login } = useAuth();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
 
-  // Fetch employer profile on mount
   useEffect(() => {
     if (user?.token) {
       setLoading(true);
@@ -32,7 +32,6 @@ export default function EmployerProfile() {
     }
   }, [user]);
 
-  // Save profile handler
   const handleSave = async () => {
     setEditing(false);
     setLoading(true);
@@ -43,7 +42,6 @@ export default function EmployerProfile() {
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       toast.success("Profile updated!");
-      // Update context (sync with backend)
       login({ ...user, name: res.data.name, company: res.data.company });
     } catch {
       toast.error("Failed to update profile");
@@ -54,11 +52,15 @@ export default function EmployerProfile() {
   if (loading) return <div className="p-8">Loading...</div>;
 
   return (
-    <div className="max-w-lg mx-auto my-12 p-8 bg-white rounded-xl shadow flex flex-col items-center">
-      <div className="flex flex-col items-center">
+    <>
+      {/* aced */}
+      <Navbar />
+
+      <div className="max-w-lg mx-auto my-12 p-8 bg-white rounded-xl shadow flex flex-col items-center">
         <div className="h-24 w-24 rounded-full bg-yellow-200 flex items-center justify-center mb-4">
           <UserGroupIcon className="h-12 w-12 text-yellow-600" />
         </div>
+
         {!editing ? (
           <>
             <h2 className="text-2xl font-bold mb-2">{name}</h2>
@@ -100,6 +102,6 @@ export default function EmployerProfile() {
           </>
         )}
       </div>
-    </div>
+    </>
   );
 }
