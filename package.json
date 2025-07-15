@@ -1,6 +1,9 @@
 {
   "dependencies": {
+    "dotenv": "^17.2.0",
     "file-saver": "^2.0.5",
-    "react-csv": "^2.2.2"
+    "mysql2": "^3.14.2",
+    "react-csv": "^2.2.2",
+    "sequelize": "^6.37.7"
   }
 }
