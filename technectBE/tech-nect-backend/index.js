@@ -13,6 +13,10 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/jobs', require('./routes/jobs'));
 app.use('/api/gigs', require('./routes/gigs'));
 
+const profileRoutes = require("./routes/profile");
+app.use("/api/profile", profileRoutes);
+
+
 // Health check
 app.get('/', (req, res) => res.send('Tech-Nect Backend Running!'));
 

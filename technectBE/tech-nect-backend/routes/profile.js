@@ -1,4 +1,3 @@
-// routes/profile.js
 const express = require("express");
 const router = express.Router();
 const { User } = require("../models");
@@ -9,12 +8,13 @@ router.get("/", authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id);
     if (!user || user.role !== "employer") {
-      return res.status(403).json({ message: "Only employers can access this." });
+      return res.status(403).json({ message: "Access denied. Employers only." });
     }
-    const { company_name, description, website, industry, location } = user;
-    res.json({ company_name, description, website, industry, location });
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+
+    const { name, email, company_name, description, website, industry, location } = user;
+    res.json({ name, email, company_name, description, website, industry, location });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
@@ -23,7 +23,7 @@ router.put("/", authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id);
     if (!user || user.role !== "employer") {
-      return res.status(403).json({ message: "Only employers can update this." });
+      return res.status(403).json({ message: "Access denied. Employers only." });
     }
 
     const { company_name, description, website, industry, location } = req.body;
@@ -34,10 +34,9 @@ router.put("/", authMiddleware, async (req, res) => {
     user.location = location;
 
     await user.save();
-
     res.json({ message: "Profile updated successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Update failed", error: err.message });
+  } catch (error) {
+    res.status(500).json({ message: "Update failed", error: error.message });
   }
 });
 
