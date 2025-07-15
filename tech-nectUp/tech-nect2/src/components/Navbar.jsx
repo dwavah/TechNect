@@ -1,3 +1,4 @@
+// src/components/Navbar.jsx
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -8,31 +9,46 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+    setOpen(false);
+  };
+
   const linkClass = ({ isActive }) =>
     isActive
       ? "font-bold text-yellow-400 underline underline-offset-4"
       : "hover:text-yellow-400 transition";
 
-  // All navigation links, role based
-  const commonLinks = [
-    ...(user && user.role === "student"
-      ? [
-          <NavLink key="jobs" to="/jobs" className={linkClass} onClick={() => setOpen(false)}>Jobs</NavLink>,
-          <NavLink key="gigs" to="/gigs" className={linkClass} onClick={() => setOpen(false)}>Gigs</NavLink>,
-          <NavLink key="upskill" to="/upskill" className={linkClass} onClick={() => setOpen(false)}>Upskill</NavLink>,
-          <NavLink key="dashboard" to="/student/dashboard" className={linkClass} onClick={() => setOpen(false)}>Dashboard</NavLink>,
-          <NavLink key="profile" to="/student/profile" className={linkClass} onClick={() => setOpen(false)}>Profile</NavLink>,
-        ]
-      : []),
-    ...(user && user.role === "employer"
-      ? [
-          <NavLink key="dashboard" to="/employer/dashboard" className={linkClass} onClick={() => setOpen(false)}>Dashboard</NavLink>,
-          <NavLink key="profile" to="/employer/profile" className={linkClass} onClick={() => setOpen(false)}>Profile</NavLink>,
-          <NavLink key="myjobs" to="/employer/jobs" className={linkClass} onClick={() => setOpen(false)}>My Jobs</NavLink>,
-          <NavLink key="postjob" to="/employer/jobs/post" className={linkClass} onClick={() => setOpen(false)}>Post Job</NavLink>,
-        ]
-      : []),
-  ];
+  const renderLinks = () => {
+    if (!user) return [];
+
+    const base = [];
+
+    if (user.role === "student") {
+      base.push(
+        <NavLink key="jobs" to="/jobs" className={linkClass} onClick={() => setOpen(false)}>Jobs</NavLink>,
+        <NavLink key="gigs" to="/gigs" className={linkClass} onClick={() => setOpen(false)}>Gigs</NavLink>,
+        <NavLink key="upskill" to="/upskill" className={linkClass} onClick={() => setOpen(false)}>Upskill</NavLink>,
+        <NavLink key="dashboard" to="/student/dashboard" className={linkClass} onClick={() => setOpen(false)}>Dashboard</NavLink>,
+        <NavLink key="profile" to="/student/profile" className={linkClass} onClick={() => setOpen(false)}>Profile</NavLink>,
+      );
+    } else if (user.role === "employer") {
+      base.push(
+        <NavLink key="dashboard" to="/employer/dashboard" className={linkClass} onClick={() => setOpen(false)}>Dashboard</NavLink>,
+        <NavLink key="profile" to="/employer/profile" className={linkClass} onClick={() => setOpen(false)}>Profile</NavLink>,
+        <NavLink key="myjobs" to="/employer/jobs" className={linkClass} onClick={() => setOpen(false)}>My Jobs</NavLink>,
+        <NavLink key="postjob" to="/employer/jobs/post" className={linkClass} onClick={() => setOpen(false)}>Post Job</NavLink>,
+        <NavLink key="postgig" to="/employer/gigs/post" className={linkClass} onClick={() => setOpen(false)}>Post Gig</NavLink>,
+      );
+    } else if (user.role === "admin") {
+      base.push(
+        <NavLink key="admindash" to="/admin/dashboard" className={linkClass} onClick={() => setOpen(false)}>Dashboard</NavLink>
+      );
+    }
+
+    return base;
+  };
 
   return (
     <nav className="bg-blue-900 text-white px-4 py-3 flex justify-between items-center shadow-lg sticky top-0 z-50">
@@ -41,7 +57,7 @@ export default function Navbar() {
         <span className="font-black text-2xl tracking-tight">Tech-Nect</span>
       </NavLink>
 
-      {/* Hamburger for mobile */}
+      {/* Mobile menu toggle */}
       <button
         onClick={() => setOpen(!open)}
         className="md:hidden block text-yellow-400 focus:outline-none"
@@ -59,9 +75,9 @@ export default function Navbar() {
             <span className="text-yellow-300 font-semibold mr-2">
               Hi, {user.name}!
             </span>
-            {commonLinks}
+            {renderLinks()}
             <button
-              onClick={() => { logout(); navigate("/login"); }}
+              onClick={handleLogout}
               className="ml-2 px-3 py-1 rounded bg-yellow-500 text-blue-900 hover:bg-yellow-400 font-semibold"
             >
               Logout
@@ -84,9 +100,9 @@ export default function Navbar() {
               <span className="text-yellow-300 font-semibold mb-2">
                 Hi, {user.name}!
               </span>
-              {commonLinks}
+              {renderLinks()}
               <button
-                onClick={() => { logout(); navigate("/login"); setOpen(false); }}
+                onClick={handleLogout}
                 className="mt-2 px-3 py-1 rounded bg-yellow-500 text-blue-900 hover:bg-yellow-400 font-semibold"
               >
                 Logout
