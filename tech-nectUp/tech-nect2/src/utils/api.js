@@ -86,27 +86,6 @@ export async function updateProfile(profileData, token) {
   }
 }
 
-export const getProfile = async (token) => {
-  const res = await fetch("http://localhost:5000/api/profile", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return await res.json();
-};
-
-export const updateProfile = async (data, token) => {
-  const res = await fetch("http://localhost:5000/api/profile", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
-  return await res.json();
-};
-
 
 // Upload profile picture (student or employer)
 export async function uploadProfilePicture(file, token) {

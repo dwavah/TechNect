@@ -22,11 +22,17 @@ export function AuthProvider({ children }) {
   });
 
   const login = (data) => {
-    setUser(data.user); // data: { user: { ... }, token: ... }
-    localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("token", data.token);
-    axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+  const userWithToken = {
+    ...data.user,
+    _id: data.user._id || data.user.id, // support either key
+    token: data.token,
   };
+  setUser(userWithToken);
+  localStorage.setItem("user", JSON.stringify(userWithToken));
+  localStorage.setItem("token", data.token);
+  axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+};
+
 
   const logout = () => {
     setUser(null);

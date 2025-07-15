@@ -20,45 +20,57 @@ export default function EmployerDashboard() {
 
   // Fetch jobs and gigs for this employer
   useEffect(() => {
-    if (user?.token && user?._id) {
-      setLoading(true);
-      setError(null);
-      Promise.all([
-        axios
-          .get(`http://localhost:5000/api/jobs?employerId=${user._id}`, {
-            headers: { Authorization: `Bearer ${user.token}` },
-          })
-          .catch((err) => ({ data: [], error: err })),
-        axios
-          .get(`http://localhost:5000/api/gigs?employerId=${user._id}`, {
-            headers: { Authorization: `Bearer ${user.token}` },
-          })
-          .catch((err) => ({ data: [], error: err })),
-      ])
-        .then(([jobsRes, gigsRes]) => {
-          if (jobsRes.error || gigsRes.error) {
-            setError("Failed to load your jobs or gigs. Please try again.");
-            setJobs([]);
-            setGigs([]);
-          } else {
-            // Accept array or { jobs: [] } or { gigs: [] }
-            const jobsList = Array.isArray(jobsRes.data)
-              ? jobsRes.data
-              : jobsRes.data.jobs || [];
-            const gigsList = Array.isArray(gigsRes.data)
-              ? gigsRes.data
-              : gigsRes.data.gigs || [];
-            setJobs(jobsList);
-            setGigs(gigsList);
-          }
-          setLoading(false);
-        })
-        .catch((err) => {
-          setError(err?.response?.data?.message || err.message || "Failed to load dashboard");
-          setLoading(false);
-        });
-    }
-  }, [user]);
+  if (user?.token && user?._id) {
+    console.log("✅ Starting fetch with user ID:", user._id);
+
+    setLoading(true);
+    setError(null);
+
+    Promise.all([
+      axios.get(`http://localhost:4000/api/jobs?employerId=${user._id}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      }).catch((err) => {
+        console.error("❌ Jobs API failed:", err);
+        return { data: [], error: err };
+      }),
+      axios.get(`http://localhost:4000/api/gigs?employerId=${user._id}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      }).catch((err) => {
+        console.error("❌ Gigs API failed:", err);
+        return { data: [], error: err };
+      }),
+    ])
+      .then(([jobsRes, gigsRes]) => {
+        console.log("✅ Jobs response:", jobsRes);
+        console.log("✅ Gigs response:", gigsRes);
+
+        if (jobsRes.error || gigsRes.error) {
+          setError("Failed to load your jobs or gigs. Please try again.");
+          setJobs([]);
+          setGigs([]);
+        } else {
+          const jobsList = Array.isArray(jobsRes.data)
+            ? jobsRes.data
+            : jobsRes.data.jobs || [];
+
+          const gigsList = Array.isArray(gigsRes.data)
+            ? gigsRes.data
+            : gigsRes.data.gigs || [];
+
+          setJobs(jobsList);
+          setGigs(gigsList);
+        }
+
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("❌ Final catch error:", err);
+        setError(err.message || "Unknown error");
+        setLoading(false);
+      });
+  }
+}, [user]);
+
 
   const applicantCount = jobs?.reduce(
     (acc, job) => acc + (job.applicants?.length || 0),
