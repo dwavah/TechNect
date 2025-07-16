@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { postJob, getJobs, deleteJob } from "../../utils/api";
+import { postJob, getEmployerJobs, deleteJob } from "../../utils/api";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
+import { useNavigate } from "react-router-dom";
 
 export default function PostJob() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -13,7 +16,9 @@ export default function PostJob() {
     required_skills: "",
     deadline: "",
     status: "published",
+    company: user.company || "",
   });
+
   const [loading, setLoading] = useState(false);
   const [jobs, setJobs] = useState([]);
 
@@ -25,8 +30,17 @@ export default function PostJob() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    const jobPayload = {
+      ...form,
+      posted_by: user._id,
+      required_skills: form.required_skills
+        .split(",")
+        .map((skill) => skill.trim()),
+    };
+
     try {
-      await postJob({ ...form, posted_by: user._id }, user.token);
+      await postJob(jobPayload, user.token);
       toast.success(
         form.status === "draft" ? "Saved as draft." : "Job posted!"
       );
@@ -37,18 +51,28 @@ export default function PostJob() {
         required_skills: "",
         deadline: "",
         status: "published",
+        company: user.company || "",
       });
       fetchJobs();
     } catch (err) {
-      toast.error("Failed to post job.");
+      console.error(err);
+      toast.error("Failed to post job. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
   const fetchJobs = async () => {
-    const data = await getJobs(user.token);
-    setJobs(data || []);
+    try {
+      const data = await getEmployerJobs(user._id, user.token);
+      if (Array.isArray(data)) {
+        setJobs(data);
+      } else {
+        setJobs([]);
+      }
+    } catch (err) {
+      toast.error("Could not fetch jobs.");
+    }
   };
 
   const handleDelete = async (id) => {
@@ -57,7 +81,7 @@ export default function PostJob() {
       toast.success("Job deleted.");
       fetchJobs();
     } catch (err) {
-      toast.error("Failed to delete.");
+      toast.error("Failed to delete job.");
     }
   };
 
@@ -132,23 +156,24 @@ export default function PostJob() {
         <div className="mt-10">
           <h3 className="text-lg font-semibold mb-2 text-blue-800">Your Jobs</h3>
           <ul className="space-y-2">
-            {jobs.map((job) => (
-              <li
-                key={job.id}
-                className="border p-3 rounded flex justify-between items-center"
-              >
-                <div>
-                  <h4 className="font-medium">{job.title}</h4>
-                  <p className="text-sm text-gray-600">{job.location}</p>
-                </div>
-                <button
-                  onClick={() => handleDelete(job.id)}
-                  className="text-red-600 hover:underline"
+            {Array.isArray(jobs) &&
+              jobs.map((job) => (
+                <li
+                  key={job.id}
+                  className="border p-3 rounded flex justify-between items-center"
                 >
-                  Delete
-                </button>
-              </li>
-            ))}
+                  <div>
+                    <h4 className="font-medium">{job.title}</h4>
+                    <p className="text-sm text-gray-600">{job.location}</p>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(job.id)}
+                    className="text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </li>
+              ))}
           </ul>
         </div>
       </section>

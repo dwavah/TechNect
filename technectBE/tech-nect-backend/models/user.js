@@ -1,30 +1,22 @@
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define("User", {
     name: DataTypes.STRING,
-    email: DataTypes.STRING,
+    email: { type: DataTypes.STRING, unique: true },
     password: DataTypes.STRING,
-    role: DataTypes.STRING,
-    company_name: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    website: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    industry: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    location: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    role: DataTypes.ENUM('admin','student', 'employer'),
+    skills: { type: DataTypes.JSON, defaultValue: [] },
+    company: DataTypes.STRING,
   });
+
+  User.associate = (models) => {
+    User.hasMany(models.Job, { foreignKey: 'posted_by' });
+    User.belongsToMany(models.Job, {
+      through: models.JobApplication,
+      as: 'AppliedJobs',
+      foreignKey: 'studentId',
+      otherKey: 'jobId'
+    });
+  };
 
   return User;
 };

@@ -150,12 +150,10 @@ export async function applyToJob(jobId, token) {
   }
 }
 
-
-
-// Get jobs posted by employer
-export async function getEmployerJobs(token) {
+// Get jobs posted by a specific employer
+export async function getEmployerJobs(employerId, token) {
   try {
-    const res = await fetch(`${BASE_URL}/employer/jobs`, {
+    const res = await fetch(`${BASE_URL}/jobs?employerId=${employerId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await safeJson(res);
@@ -165,6 +163,7 @@ export async function getEmployerJobs(token) {
     return { success: false, message: err.message || "Could not fetch employer jobs." };
   }
 }
+
 
 // Post a new job (employer)
 export async function postJob(jobData, token) {

@@ -1,11 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const { Job, User, JobApplication } = require('../models');
+const { Op } = require('sequelize');
 
 // ------------------ GET ALL JOBS ------------------
+// Supports filtering by employerId using ?employerId=7
 router.get('/', async (req, res) => {
   try {
-    const jobs = await Job.findAll();
+    const { employerId } = req.query;
+
+    const whereClause = employerId
+      ? { posted_by: employerId }
+      : {};
+
+    const jobs = await Job.findAll({
+      where: whereClause,
+      order: [['createdAt', 'DESC']],
+    });
+
     res.json(jobs);
   } catch (err) {
     console.error("Error fetching jobs:", err);
@@ -84,7 +96,7 @@ router.get('/:id/applicants', async (req, res) => {
 
     if (!job) return res.status(404).json({ error: "Job not found" });
 
-    res.json(job.Applicants); // renamed alias for clarity
+    res.json(job.Applicants);
   } catch (err) {
     console.error("Applicant fetch error:", err);
     res.status(500).json({ error: "Server error" });
