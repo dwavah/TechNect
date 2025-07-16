@@ -1,4 +1,4 @@
-// src/pages/EmployerDashboard.jsx
+// src/pages/Dashboard/EmployerDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { NavLink, Link } from "react-router-dom";
@@ -19,11 +19,9 @@ export default function EmployerDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // employer
   useEffect(() => {
     if (user?.token && user?._id) {
       console.log("✅ Starting fetch with user ID:", user._id);
-
       setLoading(true);
       setError(null);
 
@@ -104,10 +102,8 @@ export default function EmployerDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-white to-blue-50">
-      {/*  here */}
       <Navbar />
 
-      {/*  employer-specific links */}
       <nav className="flex flex-wrap gap-4 p-6 justify-center bg-white shadow rounded-b-xl mb-8">
         <NavLink to="/employer/dashboard" className="flex items-center gap-2 font-bold text-yellow-800 hover:text-yellow-600">
           <BriefcaseIcon className="h-5 w-5" /> Dashboard
@@ -118,18 +114,16 @@ export default function EmployerDashboard() {
         <NavLink to="/employer/gigs" className="flex items-center gap-2 text-green-700 hover:text-green-500">
           <ClipboardDocumentListIcon className="h-5 w-5" /> My Gigs
         </NavLink>
-        <NavLink to="/employer/jobs/post" className="flex items-center gap-2 text-yellow-900 hover:text-yellow-600">
+        <NavLink to="/employer/jobs/new" className="flex items-center gap-2 text-yellow-900 hover:text-yellow-600">
           <PlusCircleIcon className="h-5 w-5" /> Post Job
         </NavLink>
-        <NavLink to="/employer/gigs/post" className="flex items-center gap-2 text-green-900 hover:text-green-600">
+        <NavLink to="/employer/gigs/new" className="flex items-center gap-2 text-green-900 hover:text-green-600">
           <PlusCircleIcon className="h-5 w-5" /> Post Gig
         </NavLink>
         <NavLink to="/employer/profile" className="flex items-center gap-2 text-gray-700 hover:text-blue-700">
           <UserGroupIcon className="h-5 w-5" /> Profile
         </NavLink>
       </nav>
-
-
     </div>
   );
 }

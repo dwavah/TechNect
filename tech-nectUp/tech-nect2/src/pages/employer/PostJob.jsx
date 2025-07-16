@@ -1,14 +1,11 @@
-// src/pages/employer/PostJob.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { postJob, getJobs, deleteJob } from "../../utils/api";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 
 export default function PostJob() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -20,13 +17,11 @@ export default function PostJob() {
   const [loading, setLoading] = useState(false);
   const [jobs, setJobs] = useState([]);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -51,47 +46,31 @@ export default function PostJob() {
     }
   };
 
-  // Fetch jobs posted by this employer
   const fetchJobs = async () => {
+    const data = await getJobs(user.token);
+    setJobs(data || []);
+  };
+
+  const handleDelete = async (id) => {
     try {
-      const allJobs = await getJobs(user.token);
-      const employerJobs = allJobs.filter(
-        (job) => job.posted_by === user._id
-      );
-      setJobs(employerJobs);
-    } catch {
-      toast.error("Failed to load jobs");
+      await deleteJob(id, user.token);
+      toast.success("Job deleted.");
+      fetchJobs();
+    } catch (err) {
+      toast.error("Failed to delete.");
     }
   };
 
   useEffect(() => {
-    if (user?.token) {
-      fetchJobs();
-    }
-  }, [user]);
-
-  // Delete a job
-  const handleDelete = async (id) => {
-    const confirm = window.confirm("Delete this job?");
-    if (!confirm) return;
-
-    try {
-      await deleteJob(id, user.token);
-      toast.success("Job deleted");
-      fetchJobs();
-    } catch {
-      toast.error("Delete failed");
-    }
-  };
+    fetchJobs();
+  }, []);
 
   return (
     <>
       <Navbar />
-
-      <section className="max-w-4xl mx-auto p-6">
+      <section className="max-w-3xl mx-auto p-6">
         <h2 className="text-2xl font-bold mb-6 text-blue-900">Post a Job</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-xl shadow mb-10">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             name="title"
@@ -141,7 +120,6 @@ export default function PostJob() {
             <option value="published">Publish Now</option>
             <option value="draft">Save as Draft</option>
           </select>
-
           <button
             type="submit"
             disabled={loading}
@@ -151,37 +129,27 @@ export default function PostJob() {
           </button>
         </form>
 
-        <div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-4">Your Jobs</h3>
-          {jobs.length === 0 ? (
-            <p className="text-gray-500">No jobs posted yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {jobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="border p-4 rounded shadow flex justify-between items-start bg-white"
-                >
-                  <div>
-                    <h4 className="text-lg font-bold text-blue-900">{job.title}</h4>
-                    <p className="text-sm text-gray-700">{job.description}</p>
-                    <div className="text-sm text-gray-500">
-                      📍 {job.location} | 🛠️ {job.required_skills} | ⏰ Deadline: {job.deadline}
-                    </div>
-                  </div>
-                  <div className="space-x-2 mt-2">
-                    <button className="text-blue-600 hover:underline text-sm">Edit</button>
-                    <button
-                      onClick={() => handleDelete(job.id)}
-                      className="text-red-600 hover:underline text-sm"
-                    >
-                      Delete
-                    </button>
-                  </div>
+        <div className="mt-10">
+          <h3 className="text-lg font-semibold mb-2 text-blue-800">Your Jobs</h3>
+          <ul className="space-y-2">
+            {jobs.map((job) => (
+              <li
+                key={job.id}
+                className="border p-3 rounded flex justify-between items-center"
+              >
+                <div>
+                  <h4 className="font-medium">{job.title}</h4>
+                  <p className="text-sm text-gray-600">{job.location}</p>
                 </div>
-              ))}
-            </div>
-          )}
+                <button
+                  onClick={() => handleDelete(job.id)}
+                  className="text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </>

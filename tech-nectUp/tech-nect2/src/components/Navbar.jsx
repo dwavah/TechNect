@@ -38,8 +38,8 @@ export default function Navbar() {
         <NavLink key="dashboard" to="/employer/dashboard" className={linkClass} onClick={() => setOpen(false)}>Dashboard</NavLink>,
         <NavLink key="profile" to="/employer/profile" className={linkClass} onClick={() => setOpen(false)}>Profile</NavLink>,
         <NavLink key="myjobs" to="/employer/jobs" className={linkClass} onClick={() => setOpen(false)}>My Jobs</NavLink>,
-        <NavLink key="postjob" to="/employer/jobs/post" className={linkClass} onClick={() => setOpen(false)}>Post Job</NavLink>,
-        <NavLink key="postgig" to="/employer/gigs/post" className={linkClass} onClick={() => setOpen(false)}>Post Gig</NavLink>,
+        <NavLink key="postjob" to="/employer/jobs/new" className={linkClass} onClick={() => setOpen(false)}>Post Job</NavLink>,
+        <NavLink key="postgig" to="/employer/gigs/new" className={linkClass} onClick={() => setOpen(false)}>Post Gig</NavLink>,
       );
     } else if (user.role === "admin") {
       base.push(
