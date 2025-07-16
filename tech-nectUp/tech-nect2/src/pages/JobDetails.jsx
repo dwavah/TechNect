@@ -1,7 +1,8 @@
+// src/pages/JobDetails.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getJobs } from "../utils/api";
+import { getJobById, applyToJob } from "../utils/api";
 import JobCard from "../components/JobCard";
 import toast from "react-hot-toast";
 
@@ -15,21 +16,25 @@ export default function JobDetails() {
   useEffect(() => {
     async function fetchJob() {
       setLoading(true);
-      const data = await getJobs(user.token);
-      const allJobs = Array.isArray(data) ? data : data.jobs || [];
-      setJob(allJobs.find(j => (j._id || j.id) === id));
+      const data = await getJobById(id, user.token);
+      if (data?.success === false || !data) {
+        toast.error("Could not load job.");
+        setJob(null);
+      } else {
+        setJob(data);
+      }
       setLoading(false);
     }
     fetchJob();
   }, [id, user.token]);
 
   const handleApply = async () => {
-    // Call API to apply (not implemented in api.js, just toast for demo)
-    toast.success("Application submitted! (Backend integration needed)");
-    // Example:
-    // await applyToJob(id, user.token)
-    //   .then(() => toast.success("Applied!"))
-    //   .catch(() => toast.error("Error applying"));
+    const res = await applyToJob(id, user.token);
+    if (res.success === false) {
+      toast.error(res.message || "Application failed.");
+    } else {
+      toast.success("Application submitted!");
+    }
   };
 
   if (loading) return <div className="p-8">Loading...</div>;
@@ -39,7 +44,7 @@ export default function JobDetails() {
     <section className="max-w-2xl mx-auto py-10 px-4">
       <JobCard
         job={job}
-        showApply={user.role === "student"}
+        showApply={user?.role === "student"}
         onApply={handleApply}
       />
       <button

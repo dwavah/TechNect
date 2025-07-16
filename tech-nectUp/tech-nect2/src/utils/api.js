@@ -150,6 +150,8 @@ export async function applyToJob(jobId, token) {
   }
 }
 
+
+
 // Get jobs posted by employer
 export async function getEmployerJobs(token) {
   try {

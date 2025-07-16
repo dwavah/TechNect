@@ -12,11 +12,13 @@ const sequelize = new Sequelize(
   }
 );
 
+// ------------------ MODELS ------------------
+
 const User = sequelize.define('User', {
   name: DataTypes.STRING,
   email: { type: DataTypes.STRING, unique: true },
   password: DataTypes.STRING,
-  role: DataTypes.ENUM('admin','student', 'employer'),
+  role: DataTypes.ENUM('admin', 'student', 'employer'),
   skills: { type: DataTypes.JSON, defaultValue: [] },
   company: DataTypes.STRING,
 });
@@ -28,6 +30,8 @@ const Job = sequelize.define('Job', {
   location: DataTypes.STRING,
   required_skills: { type: DataTypes.JSON, defaultValue: [] },
   posted_by: DataTypes.INTEGER,
+  deadline: DataTypes.STRING,
+  status: { type: DataTypes.STRING, defaultValue: 'Open' },
 });
 
 const Gig = sequelize.define('Gig', {
@@ -38,20 +42,43 @@ const Gig = sequelize.define('Gig', {
   posted_by: DataTypes.INTEGER,
 });
 
-const Application = sequelize.define('Application', {
-  userId: DataTypes.INTEGER,
+const JobApplication = sequelize.define('JobApplication', {
+  studentId: DataTypes.INTEGER,
   jobId: DataTypes.INTEGER,
   status: { type: DataTypes.STRING, defaultValue: 'pending' },
 });
 
-// Associations
+// ------------------ ASSOCIATIONS ------------------
+
+// Employers and Jobs
 User.hasMany(Job, { foreignKey: 'posted_by' });
 Job.belongsTo(User, { foreignKey: 'posted_by' });
 
+// Employers and Gigs
 User.hasMany(Gig, { foreignKey: 'posted_by' });
 Gig.belongsTo(User, { foreignKey: 'posted_by' });
 
-User.belongsToMany(Job, { through: Application, foreignKey: 'userId' });
-Job.belongsToMany(User, { through: Application, foreignKey: 'jobId' });
+// Many-to-Many: Users apply to Jobs
+User.belongsToMany(Job, {
+  through: JobApplication,
+  as: 'AppliedJobs',
+  foreignKey: 'studentId',
+  otherKey: 'jobId'
+});
 
-module.exports = { sequelize, User, Job, Gig, Application };
+Job.belongsToMany(User, {
+  through: JobApplication,
+  as: 'Applicants',
+  foreignKey: 'jobId',
+  otherKey: 'studentId'
+});
+
+// ------------------ EXPORT ------------------
+
+module.exports = {
+  sequelize,
+  User,
+  Job,
+  Gig,
+  JobApplication
+};
