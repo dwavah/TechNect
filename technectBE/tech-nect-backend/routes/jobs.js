@@ -35,24 +35,32 @@ router.post('/', async (req, res) => {
     deadline,
     status,
     posted_by,
+    company,
   } = req.body;
 
   try {
+    console.log("📥 Received job post data:", req.body);
+
     const job = await Job.create({
       title,
       description,
       location,
-      required_skills,
+      required_skills: Array.isArray(required_skills) ? required_skills.join(',') : required_skills,
       deadline,
       status,
       posted_by,
+      company,
     });
+
+    console.log("✅ Job created:", job.toJSON());
+
     res.status(201).json(job);
   } catch (err) {
-    console.error("Job creation error:", err);
+    console.error("❌ Job creation error:", err);
     res.status(400).json({ error: "Failed to create job. " + err.message });
   }
 });
+
 
 // ------------------ APPLY TO JOB ------------------
 router.post('/:id/apply', async (req, res) => {
@@ -63,7 +71,6 @@ router.post('/:id/apply', async (req, res) => {
     const job = await Job.findByPk(jobId);
     if (!job) return res.status(404).json({ error: "Job not found" });
 
-    // Check if application already exists
     const existing = await JobApplication.findOne({
       where: { jobId, studentId }
     });
@@ -71,7 +78,6 @@ router.post('/:id/apply', async (req, res) => {
       return res.status(400).json({ error: "Already applied" });
     }
 
-    // Create new application
     await JobApplication.create({ jobId, studentId });
     res.status(200).json({ message: "Applied successfully" });
   } catch (err) {

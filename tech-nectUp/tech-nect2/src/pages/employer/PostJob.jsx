@@ -16,7 +16,6 @@ export default function PostJob() {
     required_skills: "",
     deadline: "",
     status: "published",
-    company: user.company || "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -33,10 +32,11 @@ export default function PostJob() {
 
     const jobPayload = {
       ...form,
-      posted_by: user._id,
+      posted_by: user.id, // Sequelize expects id not _id
       required_skills: form.required_skills
         .split(",")
-        .map((skill) => skill.trim()),
+        .map((skill) => skill.trim())
+        .join(","), // Ensure it's sent as comma-separated string
     };
 
     try {
@@ -51,7 +51,6 @@ export default function PostJob() {
         required_skills: "",
         deadline: "",
         status: "published",
-        company: user.company || "",
       });
       fetchJobs();
     } catch (err) {
@@ -64,7 +63,7 @@ export default function PostJob() {
 
   const fetchJobs = async () => {
     try {
-      const data = await getEmployerJobs(user._id, user.token);
+      const data = await getEmployerJobs(user.id, user.token);
       if (Array.isArray(data)) {
         setJobs(data);
       } else {
