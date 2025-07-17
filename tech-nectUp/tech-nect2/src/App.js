@@ -27,7 +27,7 @@ import EmployerGigs from "./pages/employer/EmployerGigs.jsx";
 import PostGig from "./pages/employer/PostGig.jsx";
 
 // Admin (optional)
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/Dashboard/AdminDashboard";
 
 // ---- Route guards ----
 function ProtectedRoute({ children, role }) {
