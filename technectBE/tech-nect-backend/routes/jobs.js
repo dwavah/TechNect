@@ -2,16 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { Job, User, JobApplication } = require('../models');
 const { Op } = require('sequelize');
+const authenticateToken = require('../middleware/auth');
 
 // ------------------ GET ALL JOBS ------------------
-// Supports filtering by employerId using ?employerId=7
 router.get('/', async (req, res) => {
   try {
     const { employerId } = req.query;
 
-    const whereClause = employerId
-      ? { posted_by: employerId }
-      : {};
+    const whereClause = employerId ? { posted_by: employerId } : {};
 
     const jobs = await Job.findAll({
       where: whereClause,
@@ -26,33 +24,22 @@ router.get('/', async (req, res) => {
 });
 
 // ------------------ CREATE NEW JOB ------------------
-router.post('/', async (req, res) => {
-  const {
-    title,
-    description,
-    location,
-    required_skills,
-    deadline,
-    status,
-    posted_by,
-    company,
-  } = req.body;
+router.post('/', authenticateToken, async (req, res) => {
+  const { title, description, location, required_skills, deadline, status } = req.body;
 
   try {
-    console.log("📥 Received job post data:", req.body);
-
     const job = await Job.create({
       title,
       description,
       location,
-      required_skills: Array.isArray(required_skills) ? required_skills.join(',') : required_skills,
+      required_skills: Array.isArray(required_skills)
+        ? required_skills.join(',')
+        : required_skills,
       deadline,
       status,
-      posted_by,
-      company,
+      posted_by: req.user.id,
+      company: req.user.company || "Unknown Company",
     });
-
-    console.log("✅ Job created:", job.toJSON());
 
     res.status(201).json(job);
   } catch (err) {
@@ -60,7 +47,6 @@ router.post('/', async (req, res) => {
     res.status(400).json({ error: "Failed to create job. " + err.message });
   }
 });
-
 
 // ------------------ APPLY TO JOB ------------------
 router.post('/:id/apply', async (req, res) => {
@@ -96,7 +82,7 @@ router.get('/:id/applicants', async (req, res) => {
         model: User,
         as: 'Applicants',
         through: { attributes: [] },
-        attributes: ['id', 'name', 'email', 'university', 'skills'],
+        attributes: ['id', 'name', 'email', 'skills'],
       }
     });
 

@@ -1,374 +1,73 @@
-const BASE_URL = "http://localhost:4000/api"; // Change if deployed
+import axios from "axios";
 
-// Utility for parsing JSON safely
-async function safeJson(res) {
-  try {
-    return await res.json();
-  } catch {
-    return {};
-  }
-}
+const API = axios.create({
+  baseURL: "http://localhost:4000/api",
+});
 
-//-------------GET USERS ------------------//
-export async function getUsers(token) {
-  const res = await fetch(`${BASE_URL}/admin/users`, {
+// Auth
+export const registerUser = (data) => API.post("/auth/register", data);
+export const loginUser = (data) => API.post("/auth/login", data);
+
+// Users
+export const getUsers = (token) =>
+  API.get("/admin/users", {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return res.json();
-}
+export const deleteUser = (id, token) =>
+  API.delete(`/admin/users/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-// ------------------ AUTH ------------------
+// Jobs
+export const getJobs = (token) =>
+  API.get("/jobs", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const getEmployerJobs = (employerId, token) =>
+  API.get(`/jobs?employerId=${employerId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const postJob = (data, token) =>
+  API.post("/jobs", data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const editJob = (id, data, token) =>
+  API.put(`/jobs/${id}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const deleteJob = (id, token) =>
+  API.delete(`/admin/jobs/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const getJobById = (id) => API.get(`/jobs/${id}`);
+export const applyToJob = (id, studentId) =>
+  API.post(`/jobs/${id}/apply`, { studentId });
 
-// Register user (student or employer)
-export async function registerUser(userData) {
-  try {
-    const res = await fetch(`${BASE_URL}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Registration failed.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Registration failed." };
-  }
-}
+// Gigs
+export const getGigs = (token) =>
+  API.get("/gigs", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const getEmployerGigs = (employerId, token) =>
+  API.get(`/gigs?employerId=${employerId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const postGig = (data, token) =>
+  API.post("/gigs", data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const editGig = (id, data, token) =>
+  API.put(`/gigs/${id}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+export const deleteGig = (id, token) =>
+  API.delete(`/admin/gigs/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-// Login user (student or employer)
-export async function loginUser(credentials) {
-  try {
-    const res = await fetch(`${BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(credentials),
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Login failed.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Login failed." };
-  }
-}
+// Applications
+export const getStudentApplications = (studentId) =>
+  API.get(`/profile/${studentId}/applications`);
 
-// ------------------ PROFILE ------------------
-
-// Get current user profile (student or employer)
-export async function getProfile(token) {
-  try {
-    const res = await fetch(`${BASE_URL}/profile`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch profile.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch profile." };
-  }
-}
-
-// Update profile
-export async function updateProfile(profileData, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/profile`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(profileData),
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Failed to update profile.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Failed to update profile." };
-  }
-}
-
-
-// Upload profile picture (student or employer)
-export async function uploadProfilePicture(file, token) {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch(`${BASE_URL}/profile/upload`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Upload failed.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Upload failed." };
-  }
-}
-
-// ------------------ JOBS ------------------
-
-// Get all jobs (for students/general)
-export async function getJobs(token) {
-  try {
-    const res = await fetch(`${BASE_URL}/jobs`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch jobs.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch jobs." };
-  }
-}
-
-// Get a single job by ID
-export async function getJobById(id, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/jobs/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch job.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch job." };
-  }
-}
-
-// Apply to a job (for students)
-export async function applyToJob(jobId, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/jobs/${jobId}/apply`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Application failed.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Application failed." };
-  }
-}
-
-// Get jobs posted by a specific employer
-export async function getEmployerJobs(employerId, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/jobs?employerId=${employerId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch employer jobs.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch employer jobs." };
-  }
-}
-
-
-// Post a new job (employer)
-export async function postJob(jobData, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/employer/jobs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(jobData),
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Failed to post job.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Failed to post job." };
-  }
-}
-
-// Edit a job (employer)
-export async function editJob(jobId, jobData, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/employer/jobs/${jobId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(jobData),
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Failed to update job.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Failed to update job." };
-  }
-}
-
-// Delete a job (employer)
-export async function deleteJob(jobId, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/employer/jobs/${jobId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Failed to delete job.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Failed to delete job." };
-  }
-}
-
-// ------------------ GIGS ------------------
-
-// Get all gigs (for students)
-export async function getGigs(token) {
-  try {
-    const res = await fetch(`${BASE_URL}/gigs`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch gigs.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch gigs." };
-  }
-}
-
-// Get gigs posted by employer
-export async function getEmployerGigs(token) {
-  try {
-    const res = await fetch(`${BASE_URL}/employer/gigs`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch employer gigs.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch employer gigs." };
-  }
-}
-
-// Post a new gig (employer)
-export async function postGig(gigData, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/employer/gigs`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(gigData),
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Failed to post gig.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Failed to post gig." };
-  }
-}
-// Delete a gig (employer)
-export async function deleteGig(gigId, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/employer/gigs/${gigId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Failed to delete gig.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Failed to delete gig." };
-  }
-}
-
-// Edit a gig (employer)
-export async function editGig(gigId, gigData, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/employer/gigs/${gigId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(gigData),
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Failed to update gig.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Failed to update gig." };
-  }
-}
-
-// ------------------ UPSKILL ------------------
-
-export async function getUpskill(token) {
-  try {
-    const res = await fetch(`${BASE_URL}/upskill`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch upskill recommendations.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch upskill recommendations." };
-  }
-}
-
-// ------------------ APPLICATIONS ------------------
-
-export async function getStudentApplications(token) {
-  try {
-    const res = await fetch(`${BASE_URL}/applications`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch applications.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch applications." };
-  }
-}
-
-export async function getEmployerApplicants(token) {
-  try {
-    const res = await fetch(`${BASE_URL}/employer/applicants`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch applicants.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch applicants." };
-  }
-}
-
-// ------------------ ADMIN ------------------
-
-export async function getAdminStats(token) {
-  try {
-    const res = await fetch(`${BASE_URL}/admin/stats`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Could not fetch stats.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Could not fetch stats." };
-  }
-}
-
-// Delete user (admin only)
-export async function deleteUser(userId, token) {
-  try {
-    const res = await fetch(`${BASE_URL}/admin/users/${userId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await safeJson(res);
-    if (!res.ok) throw new Error(data.message || "Failed to delete user.");
-    return data;
-  } catch (err) {
-    return { success: false, message: err.message || "Failed to delete user." };
-  }
-}
+// Upskill (if you have this endpoint)
+export const getUpskill = () => API.get("/profile/upskill");

@@ -3,11 +3,9 @@ import { useAuth } from "../../context/AuthContext";
 import { postJob, getEmployerJobs, deleteJob } from "../../utils/api";
 import toast from "react-hot-toast";
 import Navbar from "../../components/Navbar";
-import { useNavigate } from "react-router-dom";
 
 export default function PostJob() {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     title: "",
@@ -32,11 +30,9 @@ export default function PostJob() {
 
     const jobPayload = {
       ...form,
-      posted_by: user.id, // Sequelize expects id not _id
       required_skills: form.required_skills
         .split(",")
         .map((skill) => skill.trim())
-        .join(","), // Ensure it's sent as comma-separated string
     };
 
     try {

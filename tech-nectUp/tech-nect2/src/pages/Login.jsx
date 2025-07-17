@@ -26,12 +26,15 @@ export default function Login() {
     }
 
     try {
-      const data = await loginUser({ email, password, role });
+      const response = await loginUser({ email, password, role });
+      const data = response.data; // ✅ unwrap axios response
+
+      console.log("LOGIN API RESPONSE", data);
+
       if (data.token && data.user) {
         login({ user: data.user, token: data.token });
         toast.success("Login successful!");
 
-        // Navigate based on actual user role from backend
         const userRole = data.user.role;
         if (userRole === "admin") {
           navigate("/admin/dashboard");
@@ -44,7 +47,8 @@ export default function Login() {
         toast.error(data.message || "Login failed.");
       }
     } catch (err) {
-      toast.error("Unable to login. Please check your credentials.");
+      console.error("Login error:", err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Login failed. Please try again.");
     }
 
     setLoading(false);
