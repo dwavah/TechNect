@@ -14,10 +14,12 @@ export const loginUser = (data) => API.post("/auth/login", data);
 // =======================
 // Jobs
 // =======================
-export const getJobs = (token) =>
-  API.get("/jobs", {
+export const getJobs = async (token) => {
+  const res = await API.get("/jobs", {
     headers: { Authorization: `Bearer ${token}` },
   });
+  return res.data; // ✅ Fix: ensure frontend receives job array
+};
 
 export const getEmployerJobs = (employerId, token) =>
   API.get(`/jobs?employerId=${employerId}`, {
@@ -47,10 +49,12 @@ export const applyToJob = (id, studentId) =>
 // =======================
 // Gigs
 // =======================
-export const getGigs = (token) =>
-  API.get("/gigs", {
+export const getGigs = async (token) => {
+  const res = await API.get("/gigs", {
     headers: { Authorization: `Bearer ${token}` },
   });
+  return res.data; // ✅ must return array directly
+};
 
 export const getEmployerGigs = (employerId, token) =>
   API.get("/gigs", {
@@ -87,7 +91,7 @@ export const getUpskill = (token) =>
     headers: { Authorization: `Bearer ${token}` },
   });
 
-  // =======================
+// =======================
 // Admin Only
 // =======================
 export const getUsers = (token) =>

@@ -1,67 +1,50 @@
-// technectBE/routes/gigs.js
-const express = require('express');
+// routes/gigs.js
+const express = require("express");
 const router = express.Router();
-const { Gig } = require('../models');
+const { Gig } = require("../models");
+const authenticateToken = require("../middleware/auth");
 
-// ------------------ GET GIGS ------------------
-router.get('/', async (req, res) => {
+// POST a new gig
+router.post("/", authenticateToken, async (req, res) => {
   try {
-    const { employerId } = req.query;
-
-    const whereClause = employerId ? { posted_by: parseInt(employerId) } : {};
-
-    const gigs = await Gig.findAll({
-      where: whereClause,
-      order: [['createdAt', 'DESC']],
-    });
-
-    res.status(200).json(gigs);
-  } catch (err) {
-    console.error("Error fetching gigs:", err.message);
-    res.status(500).json({ error: "Failed to fetch gigs" });
-  }
-});
-
-// ------------------ POST GIG ------------------
-router.post('/', async (req, res) => {
-  const { title, description, company, location, posted_by } = req.body;
-  try {
-    const gig = await Gig.create({
+    const {
       title,
       description,
       company,
       location,
+      required_skills,
       posted_by,
-      publish_status: "draft", // Default status
-      required_skills: [],     // Default skills
+    } = req.body;
+
+    const newGig = await Gig.create({
+      title,
+      description,
+      company,
+      location,
+      required_skills: required_skills || [],
+      posted_by,
+      publish_status: "published", // Force publish
     });
-    res.json(gig);
+
+    res.status(201).json(newGig);
   } catch (err) {
-    res.status(400).json({ error: "Failed to create gig. " + err.message });
+    console.error("Error creating gig:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// ------------------ UPDATE GIG ------------------
-router.put("/:id", async (req, res) => {
+// GET all published gigs for students
+router.get("/", async (req, res) => {
   try {
-    const gig = await Gig.findByPk(req.params.id);
-    if (!gig) return res.status(404).json({ error: "Gig not found" });
-    await gig.update(req.body);
-    res.json(gig);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update gig. " + err.message });
-  }
-});
+    const gigs = await Gig.findAll({
+      where: { publish_status: "published" }, // Only show published gigs
+      order: [["createdAt", "DESC"]],
+    });
 
-// ------------------ DELETE GIG ------------------
-router.delete("/:id", async (req, res) => {
-  try {
-    const gig = await Gig.findByPk(req.params.id);
-    if (!gig) return res.status(404).json({ error: "Gig not found" });
-    await gig.destroy();
-    res.json({ message: "Gig deleted successfully." });
+    res.status(200).json(gigs);
   } catch (err) {
-    res.status(500).json({ error: "Failed to delete gig. " + err.message });
+    console.error("Error fetching gigs:", err);
+    res.status(500).json({ message: "Failed to fetch gigs." });
   }
 });
 

@@ -1,30 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const { Job, User, JobApplication } = require('../models');
-const { Op } = require('sequelize');
 const authenticateToken = require('../middleware/auth');
 
-// ------------------ GET ALL JOBS or FILTERED BY EMPLOYER ------------------
+// ------------------ GET ALL JOBS (public) ------------------
 router.get('/', async (req, res) => {
   try {
-    const { employerId } = req.query;
-
-    const whereClause = employerId ? { posted_by: employerId } : {};
-
+    // ✅ Remove employerId filtering for student/public view
     const jobs = await Job.findAll({
-      where: whereClause,
       order: [['createdAt', 'DESC']],
     });
 
-    // Format required_skills as array before sending
-    const formattedJobs = jobs.map((job) => {
-      return {
-        ...job.toJSON(),
-        required_skills: typeof job.required_skills === 'string'
-          ? job.required_skills.split(',').map((s) => s.trim())
-          : job.required_skills
-      };
-    });
+    // ✅ Safely parse required_skills
+    const formattedJobs = jobs.map((job) => ({
+      ...job.toJSON(),
+      required_skills: typeof job.required_skills === 'string'
+        ? job.required_skills.split(',').map(s => s.trim())
+        : job.required_skills
+    }));
 
     res.json(formattedJobs);
   } catch (err) {
@@ -33,7 +26,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ------------------ CREATE NEW JOB ------------------
+// ------------------ CREATE NEW JOB (protected) ------------------
 router.post('/', authenticateToken, async (req, res) => {
   const { title, description, location, required_skills, deadline, status } = req.body;
 
@@ -49,6 +42,7 @@ router.post('/', authenticateToken, async (req, res) => {
       status,
       posted_by: req.user.id,
       company: req.user.company || "Unknown Company",
+      publish_status: "draft", // ✅ default; change via update if needed
     });
 
     res.status(201).json(job);

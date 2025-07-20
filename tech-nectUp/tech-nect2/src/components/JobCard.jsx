@@ -1,5 +1,6 @@
+// src/components/JobCard.jsx
 import React from "react";
-import { BriefcaseIcon } from "@heroicons/react/outline";
+import { BriefcaseIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
 // showApply: show the Apply button (default false)
@@ -17,7 +18,8 @@ export default function JobCard({ job, onApply, showApply = false, onClick }) {
         <span className="font-bold text-xl">{job.title}</span>
       </div>
       <div className="text-blue-700">
-        {job.company} <span className="text-sm text-gray-600">| {job.location}</span>
+        {job.company || "Unknown Company"}{" "}
+        <span className="text-sm text-gray-600">| {job.location}</span>
       </div>
       <div className="my-2 text-slate-700">{job.description}</div>
       {job.required_skills && job.required_skills.length > 0 && (
@@ -28,7 +30,10 @@ export default function JobCard({ job, onApply, showApply = false, onClick }) {
       {showApply && (
         <button
           className="bg-green-600 text-white px-4 py-2 rounded mt-3 hover:bg-green-500"
-          onClick={e => { e.stopPropagation(); onApply && onApply(job); }}
+          onClick={e => {
+            e.stopPropagation();
+            onApply && onApply(job);
+          }}
         >
           Apply
         </button>

@@ -18,7 +18,13 @@ export default function Jobs() {
       setLoading(true);
       try {
         const data = await getJobs(user.token);
-        setJobs(Array.isArray(data) ? data : data.jobs || []);
+        const jobList = Array.isArray(data) ? data : data.jobs || [];
+
+        console.log("Jobs fetched:", jobList);
+
+        // ✅ Filter only jobs that have basic required info
+        const filtered = jobList.filter(j => j.title && j.company);
+        setJobs(filtered);
       } catch (err) {
         console.error("Error fetching jobs:", err);
       }
@@ -28,7 +34,7 @@ export default function Jobs() {
   }, [user.token]);
 
   const filteredJobs = jobs.filter(
-    j =>
+    (j) =>
       j.title.toLowerCase().includes(q.toLowerCase()) ||
       (j.company && j.company.toLowerCase().includes(q.toLowerCase()))
   );
@@ -40,7 +46,7 @@ export default function Jobs() {
         <h2 className="text-3xl font-bold mb-4 text-blue-900">Available Jobs</h2>
         <input
           value={q}
-          onChange={e => setQ(e.target.value)}
+          onChange={(e) => setQ(e.target.value)}
           placeholder="Search jobs..."
           className="w-full mb-6 px-4 py-2 rounded border focus:ring-2 focus:ring-blue-300"
         />
@@ -49,7 +55,7 @@ export default function Jobs() {
         ) : filteredJobs.length === 0 ? (
           <div className="text-slate-500">No jobs found.</div>
         ) : (
-          filteredJobs.map(job => (
+          filteredJobs.map((job) => (
             <JobCard
               key={job._id || job.id}
               job={job}
