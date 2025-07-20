@@ -12,9 +12,15 @@ export default function Upskill() {
   useEffect(() => {
     async function fetchUpskill() {
       setLoading(true);
-      const data = await getUpskill(user.token);
-      setSuggestions(data.suggestions || []);
-      setLoading(false);
+      try {
+        const data = await getUpskill(user.token);
+        setSuggestions(data.suggestions || []);
+      } catch (err) {
+        console.warn("Upskill fetch failed:", err.message);
+        setSuggestions([]);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchUpskill();
   }, [user.token]);
@@ -22,17 +28,17 @@ export default function Upskill() {
   return (
     <>
       <Navbar />
-
       <section className="max-w-2xl mx-auto py-10 px-4">
         <h2 className="text-3xl font-bold mb-4 text-blue-900">Upskill Recommendations</h2>
         {loading ? (
           <div>Loading...</div>
         ) : (
           <ul className="list-disc pl-5 space-y-2 text-lg text-blue-800">
-            {suggestions.length === 0
-              ? <li>No suggestions at this time.</li>
-              : suggestions.map((s, idx) => <li key={idx}>{s}</li>)
-            }
+            {suggestions.length === 0 ? (
+              <li>No suggestions at this time.</li>
+            ) : (
+              suggestions.map((s, idx) => <li key={idx}>{s}</li>)
+            )}
           </ul>
         )}
       </section>

@@ -38,7 +38,7 @@ export default function MyJobs() {
     if (user?.token) {
       setLoading(true);
       axios
-        .get(`http://localhost:5000/api/jobs?employerId=${user._id}`, {
+        .get(`http://localhost:4000/api/jobs?employerId=${user._id}`, {
           headers: { Authorization: `Bearer ${user.token}` },
         })
         .then((res) => {

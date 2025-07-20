@@ -4,7 +4,7 @@ const { Job, User, JobApplication } = require('../models');
 const { Op } = require('sequelize');
 const authenticateToken = require('../middleware/auth');
 
-// ------------------ GET ALL JOBS ------------------
+// ------------------ GET ALL JOBS or FILTERED BY EMPLOYER ------------------
 router.get('/', async (req, res) => {
   try {
     const { employerId } = req.query;
@@ -16,7 +16,17 @@ router.get('/', async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
-    res.json(jobs);
+    // Format required_skills as array before sending
+    const formattedJobs = jobs.map((job) => {
+      return {
+        ...job.toJSON(),
+        required_skills: typeof job.required_skills === 'string'
+          ? job.required_skills.split(',').map((s) => s.trim())
+          : job.required_skills
+      };
+    });
+
+    res.json(formattedJobs);
   } catch (err) {
     console.error("Error fetching jobs:", err);
     res.status(500).json({ error: "Failed to fetch jobs." });

@@ -12,6 +12,8 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/jobs', require('./routes/jobs'));
 app.use('/api/gigs', require('./routes/gigs'));
+app.use("/api/profile", require("./routes/profile"));
+
 
 const profileRoutes = require("./routes/profile");
 app.use("/api/profile", profileRoutes);

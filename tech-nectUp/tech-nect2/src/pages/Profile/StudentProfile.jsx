@@ -22,7 +22,7 @@ export default function StudentProfile() {
     if (user?.token) {
       setLoading(true);
       axios
-        .get("http://localhost:5000/api/profile", {
+        .get("http://localhost:4000/api/profile", {
           headers: { Authorization: `Bearer ${user.token}` }
         })
         .then((res) => {
@@ -51,7 +51,7 @@ export default function StudentProfile() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/upload/profile-photo",
+        "http://localhost:4000/api/upload/profile-photo",
         formData,
         {
           headers: {
@@ -74,7 +74,7 @@ export default function StudentProfile() {
     setLoading(true);
     try {
       const res = await axios.put(
-        "http://localhost:5000/api/profile",
+        "http://localhost:4000/api/profile",
         { name, skills },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -109,7 +109,7 @@ export default function StudentProfile() {
                 photoUrl
                   ? photoUrl.startsWith("http")
                     ? photoUrl
-                    : `http://localhost:5000${photoUrl}`
+                    : `http://localhost:4000${photoUrl}`
                   : "/default-avatar.png"
               }
               alt="Profile"

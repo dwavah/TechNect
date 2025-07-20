@@ -1,4 +1,4 @@
-// src/utils/api.js
+// utils/api.js
 import axios from "axios";
 
 const API = axios.create({
@@ -10,19 +10,6 @@ const API = axios.create({
 // =======================
 export const registerUser = (data) => API.post("/auth/register", data);
 export const loginUser = (data) => API.post("/auth/login", data);
-
-// =======================
-// Users (Admin)
-// =======================
-export const getUsers = (token) =>
-  API.get("/admin/users", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-export const deleteUser = (id, token) =>
-  API.delete(`/admin/users/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
 
 // =======================
 // Jobs
@@ -57,12 +44,6 @@ export const getJobById = (id) => API.get(`/jobs/${id}`);
 export const applyToJob = (id, studentId) =>
   API.post(`/jobs/${id}/apply`, { studentId });
 
-// Admin - get all jobs
-export const getAllJobs = (token) =>
-  API.get("/admin/jobs", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
 // =======================
 // Gigs
 // =======================
@@ -72,7 +53,8 @@ export const getGigs = (token) =>
   });
 
 export const getEmployerGigs = (employerId, token) =>
-  API.get(`/gigs?employerId=${employerId}`, {
+  API.get("/gigs", {
+    params: { employerId },
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -91,12 +73,6 @@ export const deleteGig = (id, token) =>
     headers: { Authorization: `Bearer ${token}` },
   });
 
-// Admin - get all gigs
-export const getAllGigs = (token) =>
-  API.get("/admin/gigs", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
 // =======================
 // Applications
 // =======================
@@ -106,4 +82,30 @@ export const getStudentApplications = (studentId) =>
 // =======================
 // Upskill
 // =======================
-export const getUpskill = () => API.get("/profile/upskill");
+export const getUpskill = (token) =>
+  API.get("/profile/upskill", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  // =======================
+// Admin Only
+// =======================
+export const getUsers = (token) =>
+  API.get("/admin/users", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+export const getAllJobs = (token) =>
+  API.get("/admin/jobs", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+export const getAllGigs = (token) =>
+  API.get("/admin/gigs", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+export const deleteUser = (id, token) =>
+  API.delete(`/admin/users/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });

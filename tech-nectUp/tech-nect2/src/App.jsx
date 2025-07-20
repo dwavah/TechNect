@@ -104,6 +104,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/employer/gigs/new" element={<PostGig />} />
+        <Route path="/employer/gigs/:id/edit" element={<EditGig />} />
+
         <Route
           path="/employer/jobs"
           element={

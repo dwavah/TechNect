@@ -29,21 +29,23 @@ export default function PostGig() {
     e.preventDefault();
     setLoading(true);
 
-    const gigPayload = {
+    const payload = {
       ...form,
-      posted_by: user._id,
+      posted_by: user.id, // handle user.id
       required_skills: form.required_skills
         .split(",")
-        .map((skill) => skill.trim()),
+        .map((s) => s.trim())
+        .filter(Boolean),
     };
 
     try {
-      await postGig(gigPayload, user.token);
+      await postGig(payload, user.token);
       toast.success(
         form.status === "draft" ? "Gig saved as draft." : "Gig posted successfully!"
       );
       navigate("/employer/gigs");
-    } catch (err) {
+    } catch (error) {
+      console.error("Post gig error:", error);
       toast.error("Failed to post gig.");
     } finally {
       setLoading(false);
@@ -79,6 +81,7 @@ export default function PostGig() {
             value={form.location}
             onChange={handleChange}
             placeholder="Location"
+            required
             className="w-full border px-3 py-2 rounded"
           />
           <input
@@ -87,6 +90,7 @@ export default function PostGig() {
             value={form.required_skills}
             onChange={handleChange}
             placeholder="Required Skills (comma separated)"
+            required
             className="w-full border px-3 py-2 rounded"
           />
           <select
@@ -103,7 +107,11 @@ export default function PostGig() {
             disabled={loading}
             className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-600"
           >
-            {loading ? "Submitting..." : form.status === "draft" ? "Save Draft" : "Post Gig"}
+            {loading
+              ? "Submitting..."
+              : form.status === "draft"
+              ? "Save Draft"
+              : "Post Gig"}
           </button>
         </form>
       </section>

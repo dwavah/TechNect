@@ -13,8 +13,12 @@ export default function Gigs() {
   useEffect(() => {
     async function fetchGigs() {
       setLoading(true);
-      const data = await getGigs(user.token);
-      setGigs(Array.isArray(data) ? data : data.gigs || []);
+      try {
+        const data = await getGigs(user.token);
+        setGigs(Array.isArray(data) ? data : data.gigs || []);
+      } catch (err) {
+        console.error("Error fetching gigs:", err);
+      }
       setLoading(false);
     }
     fetchGigs();
@@ -22,9 +26,7 @@ export default function Gigs() {
 
   return (
     <>
-      {/*  top */}
       <Navbar />
-
       <section className="max-w-3xl mx-auto py-10 px-4">
         <h2 className="text-3xl font-bold mb-4 text-yellow-800">Available Gigs</h2>
         {loading ? (

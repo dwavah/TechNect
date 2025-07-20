@@ -16,8 +16,12 @@ export default function Jobs() {
   useEffect(() => {
     async function fetchJobs() {
       setLoading(true);
-      const data = await getJobs(user.token);
-      setJobs(Array.isArray(data) ? data : data.jobs || []);
+      try {
+        const data = await getJobs(user.token);
+        setJobs(Array.isArray(data) ? data : data.jobs || []);
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
+      }
       setLoading(false);
     }
     fetchJobs();
@@ -31,9 +35,7 @@ export default function Jobs() {
 
   return (
     <>
-      {/* top */}
       <Navbar />
-
       <section className="max-w-3xl mx-auto py-10 px-4">
         <h2 className="text-3xl font-bold mb-4 text-blue-900">Available Jobs</h2>
         <input
