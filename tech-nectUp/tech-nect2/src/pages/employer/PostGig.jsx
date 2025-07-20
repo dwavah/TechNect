@@ -8,15 +8,17 @@ import Navbar from "../../components/Navbar";
 
 export default function PostGig() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     title: "",
     description: "",
     location: "",
     required_skills: "",
-    status: "published", // default status
+    status: "published",
   });
+
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,8 +28,17 @@ export default function PostGig() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    const gigPayload = {
+      ...form,
+      posted_by: user._id,
+      required_skills: form.required_skills
+        .split(",")
+        .map((skill) => skill.trim()),
+    };
+
     try {
-      await postGig({ ...form, posted_by: user._id }, user.token);
+      await postGig(gigPayload, user.token);
       toast.success(
         form.status === "draft" ? "Gig saved as draft." : "Gig posted successfully!"
       );
@@ -41,9 +52,7 @@ export default function PostGig() {
 
   return (
     <>
-      {/*  top */}
       <Navbar />
-
       <section className="max-w-3xl mx-auto p-6">
         <h2 className="text-2xl font-bold mb-6 text-green-900">Post a Gig</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -89,13 +98,12 @@ export default function PostGig() {
             <option value="published">Publish Now</option>
             <option value="draft">Save as Draft</option>
           </select>
-
           <button
             type="submit"
             disabled={loading}
             className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-600"
           >
-            {loading ? "Submitting..." : "Submit"}
+            {loading ? "Submitting..." : form.status === "draft" ? "Save Draft" : "Post Gig"}
           </button>
         </form>
       </section>

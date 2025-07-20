@@ -1,4 +1,6 @@
+// src/pages/employer/PostJob.jsx
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { postJob, getEmployerJobs, deleteJob } from "../../utils/api";
 import toast from "react-hot-toast";
@@ -6,6 +8,7 @@ import Navbar from "../../components/Navbar";
 
 export default function PostJob() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     title: "",
@@ -32,7 +35,7 @@ export default function PostJob() {
       ...form,
       required_skills: form.required_skills
         .split(",")
-        .map((skill) => skill.trim())
+        .map((skill) => skill.trim()),
     };
 
     try {
@@ -40,15 +43,7 @@ export default function PostJob() {
       toast.success(
         form.status === "draft" ? "Saved as draft." : "Job posted!"
       );
-      setForm({
-        title: "",
-        description: "",
-        location: "",
-        required_skills: "",
-        deadline: "",
-        status: "published",
-      });
-      fetchJobs();
+      navigate("/employer/jobs");
     } catch (err) {
       console.error(err);
       toast.error("Failed to post job. Try again.");
@@ -144,33 +139,9 @@ export default function PostJob() {
             disabled={loading}
             className="bg-blue-700 text-white px-6 py-2 rounded hover:bg-blue-600"
           >
-            {loading ? "Submitting..." : "Submit"}
+            {loading ? "Posting..." : form.status === "draft" ? "Save Draft" : "Post Job"}
           </button>
         </form>
-
-        <div className="mt-10">
-          <h3 className="text-lg font-semibold mb-2 text-blue-800">Your Jobs</h3>
-          <ul className="space-y-2">
-            {Array.isArray(jobs) &&
-              jobs.map((job) => (
-                <li
-                  key={job.id}
-                  className="border p-3 rounded flex justify-between items-center"
-                >
-                  <div>
-                    <h4 className="font-medium">{job.title}</h4>
-                    <p className="text-sm text-gray-600">{job.location}</p>
-                  </div>
-                  <button
-                    onClick={() => handleDelete(job.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </li>
-              ))}
-          </ul>
-        </div>
       </section>
     </>
   );
