@@ -1,14 +1,15 @@
-// src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
+import { Toaster } from "react-hot-toast";
 
+// Pages
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
-import AdminDashboard from "./pages/dashboard/AdminDashboard";
-import StudentDashboard from "./pages/dashboard/StudentDashboard";
-import EmployerDashboard from "./pages/dashboard/EmployerDashboard";
+import AdminDashboard from "./pages/Dashboard/AdminDashboard";
+import StudentDashboard from "./pages/Dashboard/StudentDashboard";
+import EmployerDashboard from "./pages/Dashboard/EmployerDashboard";
 
 // ✨ Employer Pages
 import PostJob from "./pages/employer/PostJob";
@@ -86,7 +87,7 @@ function App() {
           }
         />
         <Route
-          path="/post-job"
+          path="/employer/jobs/new"
           element={
             <ProtectedRoute role="employer">
               <PostJob />
@@ -94,7 +95,7 @@ function App() {
           }
         />
         <Route
-          path="/post-gig"
+          path="/employer/gigs/new"
           element={
             <ProtectedRoute role="employer">
               <PostGig />
@@ -102,7 +103,7 @@ function App() {
           }
         />
         <Route
-          path="/employer-jobs"
+          path="/employer/jobs"
           element={
             <ProtectedRoute role="employer">
               <EmployerJobs />
@@ -110,7 +111,7 @@ function App() {
           }
         />
         <Route
-          path="/employer-gigs"
+          path="/employer/gigs"
           element={
             <ProtectedRoute role="employer">
               <EmployerGigs />
