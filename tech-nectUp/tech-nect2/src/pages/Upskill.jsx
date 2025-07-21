@@ -1,10 +1,9 @@
-// src/pages/Upskill.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getJobs, getGigs } from "../utils/api";
-import JobCard from "../components/JobCard";
-import GigCard from "../components/GigCard";
 import Navbar from "../components/Navbar";
+import UpskillJobCard from "../components/UpskillJobCard";
+import UpskillGigCard from "../components/UpskillGigCard";
 
 export default function UpSkill() {
   const { user } = useAuth();
@@ -25,6 +24,8 @@ export default function UpSkill() {
     fetchData();
   }, [user]);
 
+  const userSkills = user?.skills || []; // from context
+
   return (
     <>
       <Navbar />
@@ -35,7 +36,9 @@ export default function UpSkill() {
           <div>
             <h3 className="text-xl font-bold mb-2 text-blue-700">Jobs</h3>
             {jobs.length ? (
-              jobs.map((job) => <JobCard key={job.id} job={job} />)
+              jobs.map((job) => (
+                <UpskillJobCard key={job.id} job={job} userSkills={userSkills} />
+              ))
             ) : (
               <p className="text-gray-500">No jobs found.</p>
             )}
@@ -45,7 +48,9 @@ export default function UpSkill() {
           <div>
             <h3 className="text-xl font-bold mb-2 text-green-700">Gigs</h3>
             {gigs.length ? (
-              gigs.map((gig) => <GigCard key={gig.id} gig={gig} />)
+              gigs.map((gig) => (
+                <UpskillGigCard key={gig.id} gig={gig} userSkills={userSkills} />
+              ))
             ) : (
               <p className="text-gray-500">No gigs found.</p>
             )}
