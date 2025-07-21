@@ -20,6 +20,7 @@ import EmployerGigs from "./pages/employer/EmployerGigs";
 import EditJob from "./pages/employer/EditJob";
 import EditGig from "./pages/employer/EditGig";
 import ViewApplicants from "./pages/employer/ViewApplicants";
+import UpSkill from "./pages/Upskill";
 
 // ✨ Student Pages
 import JobList from "./pages/student/JobList";
@@ -119,6 +120,7 @@ function App() {
         />
         <Route path="/employer/gigs/new" element={<PostGig />} />
         <Route path="/employer/gigs/:id/edit" element={<EditGig />} />
+        <Route path="/upskill" element={<UpSkill />} />
 
         <Route
           path="/employer/jobs"

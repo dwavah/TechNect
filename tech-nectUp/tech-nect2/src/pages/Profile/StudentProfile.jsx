@@ -1,4 +1,4 @@
-// src/pages/student/StudentProfile.jsx
+// src/pages/Profile/StudentProfile.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { PencilSquareIcon, CheckIcon, CameraIcon } from "@heroicons/react/24/outline";
@@ -29,12 +29,9 @@ export default function StudentProfile() {
           setName(res.data.name || "");
           setSkills(res.data.skills || []);
           setPhotoUrl(res.data.photoUrl || "");
-          setLoading(false);
         })
-        .catch(() => {
-          toast.error("Failed to load profile");
-          setLoading(false);
-        });
+        .catch(() => toast.error("Failed to load profile"))
+        .finally(() => setLoading(false));
     }
   }, [user]);
 
@@ -87,18 +84,19 @@ export default function StudentProfile() {
   };
 
   const addSkill = () => {
-    if (newSkill && !skills.includes(newSkill)) {
-      setSkills([...skills, newSkill]);
+    const trimmed = newSkill.trim();
+    if (trimmed && !skills.includes(trimmed)) {
+      setSkills([...skills, trimmed]);
       setNewSkill("");
     }
   };
+
   const removeSkill = (skill) => setSkills(skills.filter(s => s !== skill));
 
   if (loading) return <div className="p-8">Loading...</div>;
 
   return (
     <>
-      {/* top */}
       <Navbar />
 
       <div className="max-w-lg mx-auto my-12 p-8 bg-white rounded-xl shadow flex flex-col items-center">
@@ -133,6 +131,7 @@ export default function StudentProfile() {
               disabled={uploading}
             />
           </div>
+
           {!editing ? (
             <>
               <h2 className="text-2xl font-bold mb-2">{name}</h2>
@@ -165,11 +164,12 @@ export default function StudentProfile() {
             </>
           )}
         </div>
+
         <div className="w-full mt-6">
           <h4 className="font-semibold text-blue-900 mb-2">Your Skills</h4>
           {!editing ? (
             <div className="flex flex-wrap gap-2">
-              {skills?.length ? (
+              {skills.length ? (
                 skills.map((skill, i) => (
                   <span key={i} className="bg-blue-100 px-3 py-1 rounded-full text-blue-700 text-sm">{skill}</span>
                 ))
@@ -181,10 +181,7 @@ export default function StudentProfile() {
             <div>
               <div className="flex flex-wrap gap-2 mb-2">
                 {skills.map((skill, i) => (
-                  <span
-                    key={i}
-                    className="bg-blue-100 px-3 py-1 rounded-full text-blue-700 text-sm flex items-center gap-1"
-                  >
+                  <span key={i} className="bg-blue-100 px-3 py-1 rounded-full text-blue-700 text-sm flex items-center gap-1">
                     {skill}
                     <button
                       className="ml-1 text-red-400"

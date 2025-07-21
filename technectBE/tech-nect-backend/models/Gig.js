@@ -1,4 +1,4 @@
-// models/Gig.js
+// models/gig.js
 module.exports = (sequelize, DataTypes) => {
   const Gig = sequelize.define("Gig", {
     title: {
@@ -7,27 +7,43 @@ module.exports = (sequelize, DataTypes) => {
     },
     description: {
       type: DataTypes.TEXT,
-    },
-    company: {
-      type: DataTypes.STRING,
+      allowNull: false,
     },
     location: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    company: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     required_skills: {
-      type: DataTypes.JSON, // Or DataTypes.ARRAY(DataTypes.STRING) for Postgres
-      defaultValue: [],
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    publish_status: {
+      type: DataTypes.ENUM("draft", "published"),
+      defaultValue: "draft",
     },
     posted_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    publish_status: {
-      type: DataTypes.STRING,
-      defaultValue: "published",
-    },
-    // You can optionally add 'status' if needed later
   });
+
+  Gig.associate = (models) => {
+    Gig.belongsTo(models.User, {
+      foreignKey: "posted_by",
+      as: "Employer",
+    });
+
+    Gig.belongsToMany(models.User, {
+      through: models.GigApplication,
+      as: "Applicants",
+      foreignKey: "gigId",
+      otherKey: "studentId",
+    });
+  };
 
   return Gig;
 };

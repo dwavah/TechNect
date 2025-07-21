@@ -1,47 +1,57 @@
 // src/pages/Upskill.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getUpskill } from "../utils/api";
+import { getJobs, getGigs } from "../utils/api";
+import JobCard from "../components/JobCard";
+import GigCard from "../components/GigCard";
 import Navbar from "../components/Navbar";
 
-export default function Upskill() {
+export default function UpSkill() {
   const { user } = useAuth();
-  const [suggestions, setSuggestions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState([]);
+  const [gigs, setGigs] = useState([]);
 
   useEffect(() => {
-    async function fetchUpskill() {
-      setLoading(true);
+    async function fetchData() {
       try {
-        const data = await getUpskill(user.token);
-        setSuggestions(data.suggestions || []);
+        const jobData = await getJobs(user?.token);
+        const gigData = await getGigs(user?.token);
+        setJobs(jobData || []);
+        setGigs(gigData || []);
       } catch (err) {
-        console.warn("Upskill fetch failed:", err.message);
-        setSuggestions([]);
-      } finally {
-        setLoading(false);
+        console.error("Error loading jobs and gigs:", err);
       }
     }
-    fetchUpskill();
-  }, [user.token]);
+    fetchData();
+  }, [user]);
 
   return (
     <>
       <Navbar />
-      <section className="max-w-2xl mx-auto py-10 px-4">
-        <h2 className="text-3xl font-bold mb-4 text-blue-900">Upskill Recommendations</h2>
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          <ul className="list-disc pl-5 space-y-2 text-lg text-blue-800">
-            {suggestions.length === 0 ? (
-              <li>No suggestions at this time.</li>
+      <div className="p-6 max-w-7xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-4 text-center">Upskill Opportunities</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Left Column: Jobs */}
+          <div>
+            <h3 className="text-xl font-bold mb-2 text-blue-700">Jobs</h3>
+            {jobs.length ? (
+              jobs.map((job) => <JobCard key={job.id} job={job} />)
             ) : (
-              suggestions.map((s, idx) => <li key={idx}>{s}</li>)
+              <p className="text-gray-500">No jobs found.</p>
             )}
-          </ul>
-        )}
-      </section>
+          </div>
+
+          {/* Right Column: Gigs */}
+          <div>
+            <h3 className="text-xl font-bold mb-2 text-green-700">Gigs</h3>
+            {gigs.length ? (
+              gigs.map((gig) => <GigCard key={gig.id} gig={gig} />)
+            ) : (
+              <p className="text-gray-500">No gigs found.</p>
+            )}
+          </div>
+        </div>
+      </div>
     </>
   );
 }

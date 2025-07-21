@@ -1,9 +1,10 @@
+// routes/profile.js
 const express = require("express");
 const router = express.Router();
 const { User, JobApplication, GigApplication, Job, Gig } = require("../models");
 const authMiddleware = require("../middleware/auth");
 
-// ✅ MOVE THIS BLOCK FIRST
+// ✅ GET student applications
 router.get("/:id/applications", authMiddleware, async (req, res) => {
   const studentId = parseInt(req.params.id);
 
@@ -39,48 +40,43 @@ router.get("/:id/applications", authMiddleware, async (req, res) => {
   }
 });
 
-// other routes BELOW this point
-router.get("/upskill", authMiddleware, (req, res) => {
-  res.json({
-    suggestions: [
-      "Learn Git & GitHub",
-      "Explore React.js",
-      "Practice MySQL queries",
-      "Improve problem-solving on LeetCode",
-    ],
-  });
-});
-
+// ✅ GET profile (for all authenticated users — student, employer, admin)
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id);
-    if (!user || user.role !== "employer") {
-      return res.status(403).json({ message: "Access denied. Employers only." });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    const { name, email, company_name, description, website, industry, location } = user;
-    res.json({ name, email, company_name, description, website, industry, location });
+    const { id, name, email, role, company, skills, photoUrl } = user;
+    res.json({ id, name, email, role, company, skills, photoUrl });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
+
+// ✅ PUT profile update (student: name + skills, employer: company info)
 router.put("/", authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id);
-    if (!user || user.role !== "employer") {
-      return res.status(403).json({ message: "Access denied. Employers only." });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role === "student") {
+      const { name, skills } = req.body;
+      user.name = name;
+      user.skills = Array.isArray(skills) ? skills : [];
+    } else if (user.role === "employer") {
+      const { company_name, description, website, industry, location } = req.body;
+      user.company_name = company_name;
+      user.description = description;
+      user.website = website;
+      user.industry = industry;
+      user.location = location;
     }
 
-    const { company_name, description, website, industry, location } = req.body;
-    user.company_name = company_name;
-    user.description = description;
-    user.website = website;
-    user.industry = industry;
-    user.location = location;
-
     await user.save();
-    res.json({ message: "Profile updated successfully" });
+    res.json(user);
   } catch (error) {
     res.status(500).json({ message: "Update failed", error: error.message });
   }
