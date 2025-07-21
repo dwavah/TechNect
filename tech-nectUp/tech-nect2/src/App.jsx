@@ -19,6 +19,7 @@ import EmployerJobs from "./pages/employer/EmployerJobs";
 import EmployerGigs from "./pages/employer/EmployerGigs";
 import EditJob from "./pages/employer/EditJob";
 import EditGig from "./pages/employer/EditGig";
+import ViewApplicants from "./pages/employer/ViewApplicants";
 
 // ✨ Student Pages
 import JobList from "./pages/student/JobList";
@@ -85,6 +86,18 @@ function App() {
           element={
             <ProtectedRoute role="employer">
               <EmployerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/student/applications" element={<StudentApplications />} />
+
+
+        <Route
+          path="/employer/jobs/:id/applicants"
+          element={
+            <ProtectedRoute role="employer">
+              <ViewApplicants />
             </ProtectedRoute>
           }
         />

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { BriefcaseIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import Navbar from "../../components/Navbar";
+import toast from "react-hot-toast";
 
 const BASE_URL = "http://localhost:4000/api";
 
@@ -16,7 +17,6 @@ export default function MyJobs() {
 
   const handleViewApplicants = async (jobId) => {
     if (selectedJobId === jobId) {
-      // Toggle off
       setSelectedJobId(null);
       setApplicants([]);
       return;
@@ -27,10 +27,32 @@ export default function MyJobs() {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       const data = await res.json();
-      setApplicants(data);
+      setApplicants(Array.isArray(data) ? data : []);
       setSelectedJobId(jobId);
     } catch (error) {
       console.error("Error fetching applicants:", error);
+      toast.error("Could not load applicants.");
+    }
+  };
+
+  const updateStatus = async (appId, newStatus) => {
+    try {
+      await axios.put(
+        `${BASE_URL}/jobs/applications/${appId}/status`,
+        { status: newStatus },
+        {
+          headers: { Authorization: `Bearer ${user.token}` },
+        }
+      );
+      setApplicants((prev) =>
+        prev.map((a) =>
+          a._id === appId ? { ...a, status: newStatus } : a
+        )
+      );
+      toast.success(`Applicant ${newStatus}.`);
+    } catch (error) {
+      console.error("Status update error:", error);
+      toast.error("Failed to update status.");
     }
   };
 
@@ -38,7 +60,7 @@ export default function MyJobs() {
     if (user?.token) {
       setLoading(true);
       axios
-        .get(`http://localhost:4000/api/jobs?employerId=${user._id}`, {
+        .get(`${BASE_URL}/jobs?employerId=${user._id}`, {
           headers: { Authorization: `Bearer ${user.token}` },
         })
         .then((res) => {
@@ -116,11 +138,38 @@ export default function MyJobs() {
                           {applicants.length === 0 ? (
                             <div className="text-gray-500">No applicants yet.</div>
                           ) : (
-                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">
+                            <ul className="space-y-3 text-sm text-gray-700">
                               {applicants.map((a) => (
-                                <li key={a.id}>
-                                  <span className="font-medium">{a.name}</span> —{" "}
-                                  {a.email} — {a.university || "N/A"}
+                                <li key={a._id} className="flex justify-between items-center">
+                                  <div>
+                                    <span className="font-medium">{a.name}</span> —{" "}
+                                    {a.email} — {a.university || "N/A"} —{" "}
+                                    <span
+                                      className={`ml-2 px-2 py-1 rounded text-xs ${
+                                        a.status === "approved"
+                                          ? "bg-green-100 text-green-800"
+                                          : a.status === "denied"
+                                          ? "bg-red-100 text-red-800"
+                                          : "bg-gray-100 text-gray-800"
+                                      }`}
+                                    >
+                                      {a.status || "Pending"}
+                                    </span>
+                                  </div>
+                                  <div className="space-x-2">
+                                    <button
+                                      onClick={() => updateStatus(a._id, "approved")}
+                                      className="text-green-600 hover:underline"
+                                    >
+                                      Approve
+                                    </button>
+                                    <button
+                                      onClick={() => updateStatus(a._id, "denied")}
+                                      className="text-red-600 hover:underline"
+                                    >
+                                      Deny
+                                    </button>
+                                  </div>
                                 </li>
                               ))}
                             </ul>

@@ -1,9 +1,45 @@
 const express = require("express");
 const router = express.Router();
-const { User } = require("../models");
+const { User, JobApplication, GigApplication, Job, Gig } = require("../models");
 const authMiddleware = require("../middleware/auth");
 
-// ✅ FIXED: define router BEFORE using it
+// ✅ MOVE THIS BLOCK FIRST
+router.get("/:id/applications", authMiddleware, async (req, res) => {
+  const studentId = parseInt(req.params.id);
+
+  if (req.user.id !== studentId || req.user.role !== "student") {
+    return res.status(403).json({ message: "Unauthorized access" });
+  }
+
+  try {
+    const jobApplications = await JobApplication.findAll({
+      where: { studentId },
+      include: [
+        {
+          model: Job,
+          include: [{ model: User, attributes: ["name", "email", "company"], as: "User" }],
+        },
+      ],
+    });
+
+    const gigApplications = await GigApplication.findAll({
+      where: { studentId },
+      include: [
+        {
+          model: Gig,
+          include: [{ model: User, attributes: ["name", "email", "company"], as: "User" }],
+        },
+      ],
+    });
+
+    res.json({ jobApplications, gigApplications });
+  } catch (err) {
+    console.error("Error fetching applications:", err);
+    res.status(500).json({ message: "Failed to fetch applications." });
+  }
+});
+
+// other routes BELOW this point
 router.get("/upskill", authMiddleware, (req, res) => {
   res.json({
     suggestions: [
@@ -15,7 +51,6 @@ router.get("/upskill", authMiddleware, (req, res) => {
   });
 });
 
-// Existing employer profile routes
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id);

@@ -11,7 +11,14 @@ const authenticateToken = async (req, res, next) => {
     const user = await User.findByPk(decoded.id);
     if (!user) return res.status(403).json({ message: "User not found." });
 
-    req.user = user;
+    req.user = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      company: user.company,
+    }; // Attach minimal and clean user info
+
     next();
   } catch (err) {
     console.error("JWT Error:", err);
@@ -19,4 +26,4 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-module.exports = authenticateToken; // ✅ make sure this line exists
+module.exports = authenticateToken;

@@ -18,7 +18,7 @@ export const getJobs = async (token) => {
   const res = await API.get("/jobs", {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return res.data; // ✅ Fix: ensure frontend receives job array
+  return res.data;
 };
 
 export const getEmployerJobs = (employerId, token) =>
@@ -43,8 +43,10 @@ export const deleteJob = (id, token) =>
 
 export const getJobById = (id) => API.get(`/jobs/${id}`);
 
-export const applyToJob = (id, studentId) =>
-  API.post(`/jobs/${id}/apply`, { studentId });
+export const applyToJob = (jobId, studentId, token) =>
+  API.post(`/jobs/${jobId}/apply`, { studentId }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
 // =======================
 // Gigs
@@ -53,7 +55,7 @@ export const getGigs = async (token) => {
   const res = await API.get("/gigs", {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return res.data; // ✅ must return array directly
+  return res.data;
 };
 
 export const getEmployerGigs = (employerId, token) =>
@@ -77,11 +79,58 @@ export const deleteGig = (id, token) =>
     headers: { Authorization: `Bearer ${token}` },
   });
 
+export const applyToGig = (gigId, studentId, token) =>
+  API.post(`/gigs/${gigId}/apply`, { studentId }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+
+// Get applicants for a specific gig
+export const getGigApplicants = (gigId, token) =>
+  API.get(`/gigs/${gigId}/applicants`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+// Approve or deny a specific gig application
+export const updateGigApplicationStatus = (appId, status, token) =>
+  API.put(`/gigs/applications/${appId}/status`, { status }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+//new methods
+export const getGigById = async (id, token) => {
+  const res = await axios.get(`/api/gigs/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
+export const updateGig = async (id, updatedData, token) => {
+  const res = await axios.put(`/api/gigs/${id}`, updatedData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return res.data;
+};
+
+
 // =======================
 // Applications
 // =======================
 export const getStudentApplications = (studentId) =>
   API.get(`/profile/${studentId}/applications`);
+
+// Get applicants for a specific job
+export const getJobApplicants = (jobId, token) =>
+  API.get(`/jobs/${jobId}/applicants`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+// Approve or deny a specific job application
+export const updateJobApplicationStatus = (appId, status, token) =>
+  API.put(`/jobs/applications/${appId}/status`, { status }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
 
 // =======================
 // Upskill

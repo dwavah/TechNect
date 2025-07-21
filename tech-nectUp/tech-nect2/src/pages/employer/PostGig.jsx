@@ -15,7 +15,7 @@ export default function PostGig() {
     description: "",
     location: "",
     required_skills: "",
-    status: "published",
+    publish_status: "published",
   });
 
   const [loading, setLoading] = useState(false);
@@ -30,13 +30,14 @@ export default function PostGig() {
     setLoading(true);
 
     const payload = {
-      ...form,
-      posted_by: user.id, // handle user.id
-      required_skills: form.required_skills
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean),
-    };
+  ...form,
+  posted_by: user.id,
+  required_skills: form.required_skills
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+};
+
 
     try {
       await postGig(payload, user.token);
@@ -94,7 +95,7 @@ export default function PostGig() {
             className="w-full border px-3 py-2 rounded"
           />
           <select
-            name="status"
+            name="publish_status"
             value={form.status}
             onChange={handleChange}
             className="w-full border px-3 py-2 rounded"

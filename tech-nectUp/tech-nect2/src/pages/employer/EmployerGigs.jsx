@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getEmployerGigs, deleteGig } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import Navbar from "../../components/Navbar"; // ✅ Import the Navbar
+import Navbar from "../../components/Navbar";
 
 export default function EmployerGigs() {
   const { user } = useAuth();
@@ -20,7 +20,7 @@ export default function EmployerGigs() {
       try {
         const data = await getEmployerGigs(user.id, user.token);
         console.log("Fetched gigs:", data);
-        setGigs(Array.isArray(data) ? data : []);
+        setGigs(Array.isArray(data.data) ? data.data : []);
       } catch (err) {
         console.error("Error fetching gigs:", err);
         toast.error("Failed to fetch gigs.");
@@ -46,7 +46,7 @@ export default function EmployerGigs() {
 
   return (
     <>
-      <Navbar /> {/* ✅ Render Navbar here */}
+      <Navbar />
       <section className="max-w-3xl mx-auto py-10 px-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-3xl font-bold text-green-800">My Gigs</h2>

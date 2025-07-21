@@ -3,15 +3,13 @@ const router = express.Router();
 const { Job, User, JobApplication } = require('../models');
 const authenticateToken = require('../middleware/auth');
 
-// ------------------ GET ALL JOBS (public) ------------------
+// ------------------ GET ALL JOBS ------------------
 router.get('/', async (req, res) => {
   try {
-    // ✅ Remove employerId filtering for student/public view
     const jobs = await Job.findAll({
       order: [['createdAt', 'DESC']],
     });
 
-    // ✅ Safely parse required_skills
     const formattedJobs = jobs.map((job) => ({
       ...job.toJSON(),
       required_skills: typeof job.required_skills === 'string'
@@ -26,7 +24,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ------------------ CREATE NEW JOB (protected) ------------------
+// ------------------ POST A NEW JOB ------------------
 router.post('/', authenticateToken, async (req, res) => {
   const { title, description, location, required_skills, deadline, status } = req.body;
 
@@ -42,7 +40,7 @@ router.post('/', authenticateToken, async (req, res) => {
       status,
       posted_by: req.user.id,
       company: req.user.company || "Unknown Company",
-      publish_status: "draft", // ✅ default; change via update if needed
+      publish_status: "draft",
     });
 
     res.status(201).json(job);
@@ -52,21 +50,17 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// ------------------ APPLY TO JOB ------------------
-router.post('/:id/apply', async (req, res) => {
+// ------------------ APPLY TO A JOB ------------------
+router.post('/:id/apply', authenticateToken, async (req, res) => {
   const jobId = req.params.id;
-  const { studentId } = req.body;
+  const studentId = req.user.id;
 
   try {
     const job = await Job.findByPk(jobId);
     if (!job) return res.status(404).json({ error: "Job not found" });
 
-    const existing = await JobApplication.findOne({
-      where: { jobId, studentId }
-    });
-    if (existing) {
-      return res.status(400).json({ error: "Already applied" });
-    }
+    const existing = await JobApplication.findOne({ where: { jobId, studentId } });
+    if (existing) return res.status(400).json({ error: "Already applied" });
 
     await JobApplication.create({ jobId, studentId });
     res.status(200).json({ message: "Applied successfully" });
@@ -77,24 +71,50 @@ router.post('/:id/apply', async (req, res) => {
 });
 
 // ------------------ GET APPLICANTS FOR A JOB ------------------
-router.get('/:id/applicants', async (req, res) => {
+router.get('/:id/applicants', authenticateToken, async (req, res) => {
   const jobId = req.params.id;
 
   try {
-    const job = await Job.findByPk(jobId, {
+    const applications = await JobApplication.findAll({
+      where: { jobId },
       include: {
         model: User,
-        as: 'Applicants',
-        through: { attributes: [] },
-        attributes: ['id', 'name', 'email', 'skills'],
+        attributes: ['id', 'name', 'email', 'skills']
       }
     });
 
-    if (!job) return res.status(404).json({ error: "Job not found" });
+    const formatted = applications.map(app => ({
+      id: app.id,
+      status: app.status,
+      student: app.User,
+    }));
 
-    res.json(job.Applicants);
+    res.json(formatted);
   } catch (err) {
     console.error("Applicant fetch error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ------------------ APPROVE OR DENY APPLICANT ------------------
+router.put('/applications/:id/status', authenticateToken, async (req, res) => {
+  const appId = req.params.id;
+  const { status } = req.body;
+
+  if (!['approved', 'denied'].includes(status)) {
+    return res.status(400).json({ error: "Invalid status value" });
+  }
+
+  try {
+    const app = await JobApplication.findByPk(appId);
+    if (!app) return res.status(404).json({ error: "Application not found" });
+
+    app.status = status;
+    await app.save();
+
+    res.json({ message: `Application ${status}` });
+  } catch (err) {
+    console.error("Status update error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

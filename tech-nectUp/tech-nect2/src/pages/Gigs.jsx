@@ -1,10 +1,11 @@
 // src/pages/Gigs.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getGigs } from "../utils/api";
+import { getGigs, applyToGig } from "../utils/api";
 import GigCard from "../components/GigCard";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import toast from "react-hot-toast";
 
 export default function Gigs() {
   const { user } = useAuth();
@@ -19,7 +20,6 @@ export default function Gigs() {
       setLoading(true);
       try {
         const data = await getGigs(user.token);
-        console.log("ALL GIGS:", data); // Expecting an array
         setGigs(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Error fetching gigs:", err);
@@ -35,6 +35,16 @@ export default function Gigs() {
       g.title?.toLowerCase().includes(q.toLowerCase()) ||
       (g.company && g.company.toLowerCase().includes(q.toLowerCase()))
   );
+
+  const handleApply = async (gigId) => {
+    try {
+      await applyToGig(gigId, user.id, user.token);
+      toast.success("Applied to gig!");
+    } catch (err) {
+      toast.error("Failed to apply.");
+      console.error("Apply error:", err);
+    }
+  };
 
   return (
     <>
@@ -56,6 +66,8 @@ export default function Gigs() {
             <GigCard
               key={gig.id}
               gig={gig}
+              showApply
+              onApply={() => handleApply(gig.id)}
               onClick={() => navigate(`/gigs/${gig.id}`)}
             />
           ))

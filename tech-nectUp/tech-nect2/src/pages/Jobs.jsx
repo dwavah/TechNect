@@ -1,10 +1,11 @@
 // src/pages/Jobs.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getJobs } from "../utils/api";
+import { getJobs, applyToJob } from "../utils/api";
 import JobCard from "../components/JobCard";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import toast from "react-hot-toast";
 
 export default function Jobs() {
   const { user } = useAuth();
@@ -19,10 +20,6 @@ export default function Jobs() {
       try {
         const data = await getJobs(user.token);
         const jobList = Array.isArray(data) ? data : data.jobs || [];
-
-        console.log("Jobs fetched:", jobList);
-
-        // ✅ Filter only jobs that have basic required info
         const filtered = jobList.filter(j => j.title && j.company);
         setJobs(filtered);
       } catch (err) {
@@ -38,6 +35,16 @@ export default function Jobs() {
       j.title.toLowerCase().includes(q.toLowerCase()) ||
       (j.company && j.company.toLowerCase().includes(q.toLowerCase()))
   );
+
+  const handleApply = async (jobId) => {
+    try {
+      await applyToJob(jobId, user.id, user.token);
+      toast.success("Applied to job!");
+    } catch (err) {
+      toast.error("Failed to apply.");
+      console.error("Apply error:", err);
+    }
+  };
 
   return (
     <>
@@ -57,9 +64,11 @@ export default function Jobs() {
         ) : (
           filteredJobs.map((job) => (
             <JobCard
-              key={job._id || job.id}
+              key={job.id}
               job={job}
-              onClick={() => navigate(`/jobs/${job._id || job.id}`)}
+              showApply
+              onApply={() => handleApply(job.id)}
+              onClick={() => navigate(`/jobs/${job.id}`)}
             />
           ))
         )}

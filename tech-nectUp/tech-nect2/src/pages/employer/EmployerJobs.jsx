@@ -76,12 +76,18 @@ export default function EmployerJobs() {
                     )}
                   </p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     className="text-blue-700 hover:underline"
                     onClick={() => navigate(`/employer/jobs/${job._id}/edit`)}
                   >
                     Edit
+                  </button>
+                  <button
+                    className="text-green-700 hover:underline"
+                    onClick={() => navigate(`/employer/jobs/${job._id}/applicants`)}
+                  >
+                    View Applicants
                   </button>
                   <button
                     className="text-red-600 hover:underline"

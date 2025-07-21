@@ -63,20 +63,20 @@ const Gig = sequelize.define('Gig', {
 // 4. Job Application Model
 const JobApplication = sequelize.define('JobApplication', {
   studentId: DataTypes.INTEGER,
-  jobId: DataTypes.INTEGER,
   status: { type: DataTypes.STRING, defaultValue: 'pending' },
 }, {
   timestamps: true,
 });
 
+
 // 5. Gig Application Model
 const GigApplication = sequelize.define('GigApplication', {
   studentId: DataTypes.INTEGER,
-  gigId: DataTypes.INTEGER,
   status: { type: DataTypes.STRING, defaultValue: 'pending' },
 }, {
   timestamps: true,
 });
+
 
 // ------------------ ASSOCIATIONS ------------------
 
@@ -115,6 +115,10 @@ Gig.belongsToMany(User, {
   foreignKey: 'gigId',
   otherKey: 'studentId'
 });
+
+Job.belongsTo(User, { foreignKey: 'posted_by' });
+Gig.belongsTo(User, { foreignKey: 'posted_by' });
+
 
 // ------------------ EXPORT ------------------
 
