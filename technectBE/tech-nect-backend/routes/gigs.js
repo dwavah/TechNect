@@ -37,4 +37,34 @@ router.post("/", authenticateToken, async (req, res) => {
   }
 });
 
+// ✅ GET all gigs (for students or anyone)
+router.get("/", async (req, res) => {
+  try {
+    const gigs = await Gig.findAll({
+      where: { publish_status: "published" }, // Optional: filter published
+      order: [["createdAt", "DESC"]],
+    });
+    res.json(gigs);
+  } catch (err) {
+    console.error("Error fetching gigs:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+// ✅ Get a single gig by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const gig = await Gig.findByPk(req.params.id);
+    if (!gig) {
+      return res.status(404).json({ message: "Gig not found" });
+    }
+    res.json(gig);
+  } catch (err) {
+    console.error("Get gig by ID error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 module.exports = router;

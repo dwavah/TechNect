@@ -7,23 +7,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// ✅ Routes
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/jobs', require('./routes/jobs'));
 app.use('/api/gigs', require('./routes/gigs'));
-app.use('/api/profile', require('./routes/profile'));
+app.use("/api/upskill", require("./routes/upskill")); 
 
-// Health check
+
+
+// ✅ Health check route
 app.get('/', (req, res) => res.send('Tech-Nect Backend Running!'));
 
-// ✅ Wrap sync and server start in async IIFE
+// ✅ Start server
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log('Database connected ✅');
+    console.log('✅ Database connected');
 
-    await sequelize.sync({ force: true }); // 👈 only once during dev reset
+    await sequelize.sync(); // ⚠️ Only use during dev reset
 
     const PORT = process.env.PORT || 4000;
     app.listen(PORT, () => {

@@ -1,6 +1,7 @@
 // routes/profile.js
 const express = require("express");
 const router = express.Router();
+const stringSimilarity = require("string-similarity");
 const { User, JobApplication, GigApplication, Job, Gig } = require("../models");
 const authMiddleware = require("../middleware/auth");
 
@@ -81,5 +82,58 @@ router.put("/", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Update failed", error: error.message });
   }
 });
+
+// Helper function: fuzzy skill matcher
+const getMissingSkills = (studentSkills, requiredSkills) => {
+  if (!studentSkills || studentSkills.length === 0) return requiredSkills;
+
+  const missing = [];
+
+  for (let skill of requiredSkills) {
+    const { bestMatch } = stringSimilarity.findBestMatch(skill.toLowerCase(), studentSkills.map(s => s.toLowerCase()));
+    if (bestMatch.rating < 0.7) {
+      missing.push(skill);
+    }
+  }
+
+  return missing;
+};
+
+// GET /api/upskill/ai
+router.get("/ai", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "student") {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const student = await User.findByPk(req.user.id);
+    const studentSkills = student.skills || [];
+
+    const jobs = await Job.findAll({ where: { publish_status: "published" } });
+    const gigs = await Gig.findAll({ where: { publish_status: "published" } });
+
+    const jobsWithMissing = jobs.map((job) => {
+      const requiredSkills = job.required_skills || [];
+      return {
+        ...job.toJSON(),
+        missing_skills: getMissingSkills(studentSkills, requiredSkills),
+      };
+    });
+
+    const gigsWithMissing = gigs.map((gig) => {
+      const requiredSkills = gig.required_skills || [];
+      return {
+        ...gig.toJSON(),
+        missing_skills: getMissingSkills(studentSkills, requiredSkills),
+      };
+    });
+
+    return res.json({ jobs: jobsWithMissing, gigs: gigsWithMissing });
+  } catch (err) {
+    console.error("AI Upskill Error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 module.exports = router;

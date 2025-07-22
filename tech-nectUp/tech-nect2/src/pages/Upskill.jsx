@@ -1,9 +1,8 @@
+// src/pages/UpSkill.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getJobs, getGigs } from "../utils/api";
+import { getAIRecommendations } from "../utils/api"; // new function you’ll create
 import Navbar from "../components/Navbar";
-import UpskillJobCard from "../components/UpskillJobCard";
-import UpskillGigCard from "../components/UpskillGigCard";
 
 export default function UpSkill() {
   const { user } = useAuth();
@@ -11,20 +10,70 @@ export default function UpSkill() {
   const [gigs, setGigs] = useState([]);
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchAIData() {
       try {
-        const jobData = await getJobs(user?.token);
-        const gigData = await getGigs(user?.token);
-        setJobs(jobData || []);
-        setGigs(gigData || []);
+        const data = await getAIRecommendations(user?.token);
+        setJobs(data.jobs || []);
+        setGigs(data.gigs || []);
       } catch (err) {
-        console.error("Error loading jobs and gigs:", err);
+        console.error("Failed to fetch upskill data:", err);
       }
     }
-    fetchData();
+
+    if (user?.role === "student") {
+      fetchAIData();
+    }
   }, [user]);
 
-  const userSkills = user?.skills || []; // from context
+  const JobCard = ({ job }) => {
+    const missingSkills = job?.missing_skills || [];
+
+    return (
+      <div className="border p-4 rounded shadow mb-4 bg-white">
+        <h4 className="text-lg font-bold text-blue-800">{job.title}</h4>
+        <p className="text-sm text-gray-600 mb-2">{job.company}</p>
+        <p className="text-gray-700">{job.description}</p>
+        <p className="text-sm text-gray-500 mt-2">
+          Required: {job.required_skills.join(", ")}
+        </p>
+
+        {missingSkills.length === 0 ? (
+          <button className="mt-3 px-4 py-1 bg-green-600 text-white rounded">
+            Apply Now
+          </button>
+        ) : (
+          <div className="mt-3 text-sm text-yellow-800 bg-yellow-100 p-2 rounded">
+            Missing skills: {missingSkills.join(", ")}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const GigCard = ({ gig }) => {
+    const missingSkills = gig?.missing_skills || [];
+
+    return (
+      <div className="border p-4 rounded shadow mb-4 bg-white">
+        <h4 className="text-lg font-bold text-green-800">{gig.title}</h4>
+        <p className="text-sm text-gray-600 mb-2">{gig.company}</p>
+        <p className="text-gray-700">{gig.description}</p>
+        <p className="text-sm text-gray-500 mt-2">
+          Required: {gig.required_skills.join(", ")}
+        </p>
+
+        {missingSkills.length === 0 ? (
+          <button className="mt-3 px-4 py-1 bg-green-600 text-white rounded">
+            Apply Now
+          </button>
+        ) : (
+          <div className="mt-3 text-sm text-yellow-800 bg-yellow-100 p-2 rounded">
+            Missing skills: {missingSkills.join(", ")}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -32,25 +81,21 @@ export default function UpSkill() {
       <div className="p-6 max-w-7xl mx-auto">
         <h2 className="text-2xl font-semibold mb-4 text-center">Upskill Opportunities</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Left Column: Jobs */}
+          {/* Jobs */}
           <div>
             <h3 className="text-xl font-bold mb-2 text-blue-700">Jobs</h3>
             {jobs.length ? (
-              jobs.map((job) => (
-                <UpskillJobCard key={job.id} job={job} userSkills={userSkills} />
-              ))
+              jobs.map((job) => <JobCard key={job.id} job={job} />)
             ) : (
               <p className="text-gray-500">No jobs found.</p>
             )}
           </div>
 
-          {/* Right Column: Gigs */}
+          {/* Gigs */}
           <div>
             <h3 className="text-xl font-bold mb-2 text-green-700">Gigs</h3>
             {gigs.length ? (
-              gigs.map((gig) => (
-                <UpskillGigCard key={gig.id} gig={gig} userSkills={userSkills} />
-              ))
+              gigs.map((gig) => <GigCard key={gig.id} gig={gig} />)
             ) : (
               <p className="text-gray-500">No gigs found.</p>
             )}

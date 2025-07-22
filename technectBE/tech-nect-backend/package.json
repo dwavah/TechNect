@@ -18,7 +18,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.2",
-    "python-shell": "^5.0.0"
+    "python-shell": "^5.0.0",
+    "string-similarity": "^4.0.4"
   },
   "devDependencies": {
     "sequelize": "^6.37.7",

@@ -162,3 +162,18 @@ export const deleteUser = (id, token) =>
   API.delete(`/admin/users/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
+
+export async function getAIRecommendations(token) {
+  const res = await fetch("http://localhost:4000/api/upskill/ai", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch AI recommendations");
+  }
+
+  return res.json();
+}
